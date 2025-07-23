@@ -1,0 +1,30 @@
+<div class="add-doc-container">
+  <form [formGroup]="documentForm" (ngSubmit)="onSubmit()">
+    <h3>Ajouter un nouveau document</h3>
+
+    <label for="title">Titre du document *</label>
+    <input id="title" formControlName="title" type="text" placeholder="Ex. Grille d’évaluation pour enfants autistes" />
+
+    <label for="description">Description</label>
+    <textarea id="description" formControlName="description" rows="4" placeholder="Décrivez le document..."></textarea>
+
+    <label for="categories">Catégorie(s)</label>
+    <input id="categories" formControlName="categories" type="text" placeholder="Ex: Grilles ABLLS, Guides Pratiques" />
+
+    <label for="file">Fichier</label>
+    <input id="file" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" />
+    <p *ngIf="fileName">Fichier sélectionné : {{ fileName }}</p>
+
+    <div class="premium">
+      <label>
+        <input type="checkbox" formControlName="isPremium" />
+        Premium
+      </label>
+    </div>
+
+    <div class="btn-group">
+      <button type="submit" [disabled]="uploading || documentForm.invalid">Enregistrer</button>
+      <button type="button" class="cancel" (click)="router.navigateByUrl('/documents')">Annuler</button>
+    </div>
+  </form>
+</div>

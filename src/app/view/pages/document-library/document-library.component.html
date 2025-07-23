@@ -1,0 +1,69 @@
+<div class="document-library container py-4">
+  <h2 class="text-center mb-4">📚 Bibliothèque de Documents</h2>
+  <button *ngIf="auth.isAdmin" class="btn-create" (click)="createDocument()">
+  ➕ Nouveau document
+</button>
+
+
+  <div class="search-bar mb-4 d-flex justify-content-center">
+    <input class="form-control w-50" type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un guide, un modèle, un sujet..." />
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <div class="categories card p-3">
+        <strong>Catégories</strong>
+        <ul class="list-unstyled mt-2">
+          <li *ngFor="let category of categories">{{ category }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+      <div class="row">
+        <div *ngFor="let doc of documents" class="col-md-4 mb-4">
+          <div class="document-card card h-100">
+            <div class="card-body">
+              <div class="file-type" [ngClass]="docExtensionClass(doc.fileUrl)">
+                {{ getFileExtension(doc.fileUrl) }}
+              </div>
+              <div *ngIf="doc.isPremium" class="badge premium-badge">Premium</div>
+              <h5 class="card-title">{{ doc.title }}</h5>
+              <p class="card-text">{{ doc.description }}</p>
+            </div>
+            <div class="card-footer text-center">
+  <!-- ✅ Premium -->
+  <button
+    *ngIf="doc.isPremium && !(auth.userSubscription?.isActive)"
+    class="btn btn-danger w-100"
+    disabled
+  >
+    Abonnez-vous pour accéder
+  </button>
+
+  <!-- ✅ Libre -->
+  <a
+    *ngIf="!doc.isPremium || auth.userSubscription?.isActive"
+    [href]="doc.fileUrl"
+    download
+    class="btn btn-primary w-100"
+  >
+    Télécharger
+  </a>
+</div>
+
+          </div>
+        </div>
+      </div>
+
+      <nav class="d-flex justify-content-center mt-3">
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="#">« Précédent</a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">Suivant »</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

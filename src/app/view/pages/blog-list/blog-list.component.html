@@ -1,0 +1,34 @@
+<div class="blog-wrapper container py-4">
+  <div class="header d-flex justify-content-between align-items-center mb-4">
+    <h2 class="m-0">📰 Derniers Articles du Blog</h2>
+    <a class="text-decoration-none fw-bold" routerLink="/blog/catalogue">Voir tout le blog →</a>
+     <a *ngIf="isAdmin$ | async"
+ class="btn btn-success btn-sm" routerLink="/blogEditor">
+      ➕ Ajouter un article
+    </a>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5 text-muted">
+    Chargement des articles...
+  </div>
+
+  <div *ngIf="!loading && posts.length > 0" class="row">
+    <div class="col-md-6 col-lg-4 mb-4" *ngFor="let post of posts | slice:0:6">
+      <div class="blog-card card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ post.title }}</h5>
+          <div class="card-text text-muted small" [innerHTML]="excerpt(post.content)"></div>
+        </div>
+
+        <div class="card-footer bg-transparent border-top d-flex justify-content-between align-items-center">
+          <small class="text-muted">{{ post.category }}</small>
+          <a [routerLink]="['/blog', post.id]" class="btn btn-sm btn-outline-primary">Lire →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && posts.length === 0" class="text-center text-muted">
+    Aucun article publié pour le moment.
+  </div>
+</div>

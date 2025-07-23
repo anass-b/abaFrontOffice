@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom px-4">
+  <div class="container-fluid justify-content-between">
+    <span class="navbar-brand fw-bold">ABA Platform</span>
+
+    <div class="d-flex align-items-center gap-3">
+
+      <!-- 🔧 Icône de paramètres -->
+      <button class="btn btn-light" title="Paramètres">
+        <i class="bi bi-gear-fill fs-5"></i>
+      </button>
+
+      <!-- 👤 Icône utilisateur avec dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-light dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle fs-5"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+          <li><a class="dropdown-item" routerLink="/profile">Voir le profil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item text-danger" (click)="logout()">Déconnexion</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

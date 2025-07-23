@@ -1,0 +1,131 @@
+<div class="add-video-container">
+  <form [formGroup]="videoForm" (ngSubmit)="onSubmit()">
+    <h3 class="mb-3">Ajouter une nouvelle vidéo</h3>
+
+    <!-- Titre -->
+    <label for="title">Titre de la vidéo *</label>
+    <input
+      id="title"
+      type="text"
+      formControlName="title"
+      class="form-control"
+      placeholder="Ex: Principes fondamentaux de l’ABA"
+    />
+
+    <!-- Description -->
+    <label for="description" class="mt-3">Description</label>
+    <textarea
+      id="description"
+      formControlName="description"
+      class="form-control"
+      rows="3"
+    ></textarea>
+
+    <!-- Catégorie -->
+    <label for="category" class="mt-3">Catégorie(s)</label>
+    <input
+      id="category"
+      type="text"
+      formControlName="category"
+      class="form-control"
+      placeholder="Ex: Principes ABA, Techniques"
+    />
+
+    <!-- Durée -->
+    <label for="duration" class="mt-3">Durée (en minutes)</label>
+    <input
+      id="duration"
+      type="number"
+      formControlName="duration"
+      class="form-control"
+    />
+
+    <!-- Miniature -->
+    <label class="mt-3">Miniature</label>
+    <input
+      type="file"
+      accept="image/*"
+      (change)="onThumbnailSelected($event)"
+      class="form-control"
+    />
+    <img
+      *ngIf="thumbnailPreview"
+      [src]="thumbnailPreview"
+      class="thumbnail-preview mt-2"
+      style="max-width: 200px; border-radius: 4px;"
+    />
+
+    <!-- Choix source vidéo -->
+    <div class="mt-4">
+      <label class="form-check-label me-3">
+        <input
+          type="radio"
+          class="form-check-input"
+          formControlName="useExternal"
+          [value]="false"
+        />
+        Fichier vidéo hébergé
+      </label>
+
+      <label class="form-check-label">
+        <input
+          type="radio"
+          class="form-check-input"
+          formControlName="useExternal"
+          [value]="true"
+        />
+        Lien externe / Code iframe
+      </label>
+    </div>
+
+    <!-- Fichier vidéo local -->
+    <div *ngIf="!videoForm.value.useExternal" class="mt-2">
+      <input
+        type="file"
+        accept="video/mp4,video/avi,video/mov"
+        (change)="onVideoSelected($event)"
+        class="form-control"
+      />
+      <small *ngIf="videoName" class="text-muted">Fichier sélectionné : {{ videoName }}</small>
+    </div>
+
+    <!-- Lien externe -->
+    <div *ngIf="videoForm.value.useExternal" class="mt-2">
+      <input
+        type="text"
+        formControlName="url"
+        class="form-control"
+        placeholder="Lien YouTube, Vimeo ou code iframe"
+      />
+    </div>
+
+    <!-- Option Premium -->
+    <div class="form-check mt-4">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        formControlName="isPremium"
+        id="premiumCheck"
+      />
+      <label class="form-check-label" for="premiumCheck">Premium</label>
+    </div>
+
+    <!-- Boutons -->
+    <div class="mt-4 d-flex gap-2">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="uploading || videoForm.invalid"
+      >
+        {{ uploading ? 'Envoi en cours...' : 'Enregistrer' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="router.navigateByUrl('/videos')"
+      >
+        Annuler
+      </button>
+    </div>
+  </form>
+</div>

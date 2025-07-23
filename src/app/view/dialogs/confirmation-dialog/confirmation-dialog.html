@@ -1,0 +1,54 @@
+<div class="modal-dialog modal-lg modal-simple modal-confirmation">
+  <div class="modal-content">
+    <div class="modal-body" mat-dialog-content>
+      <div class="mb-4 text-center">
+        <!-- Icon based on type -->
+        <ng-container [ngSwitch]="data.type">
+          <ng-container *ngSwitchCase="'success'">
+            <i class="fas fa-check-circle"></i>
+          </ng-container>
+          <ng-container *ngSwitchCase="'error'">
+            <div class="error-icon-container">
+              <span class="error-x">X</span>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            <i class="ti ti-info-circle text-info"></i>
+          </ng-container>
+        </ng-container>
+
+        <!-- Title -->
+        <h3 class="mb-2 pt-4">
+          {{data.type=='info'?'Information':'Confirmation'}}
+        </h3>
+        
+        <!-- Message -->
+        <p>{{data.message}}</p>
+      </div>
+      
+      <form id="addActivity">
+        <div class="col-12 m-0 p-0">
+          <mat-dialog-actions class="dialog-actions justify-content-end">
+            @if (data.type != 'info') {
+              <button
+                type="button"
+                class="btn btn-label-secondary "
+                (click)="closeDialog('Cancel')"
+                aria-label="Close"
+              >
+                Annuler
+              </button>
+            }
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="closeDialog('OK')"
+            >
+              {{data.type=='info'?'Ok':'Je confirme'}}
+            </button>
+          </mat-dialog-actions>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

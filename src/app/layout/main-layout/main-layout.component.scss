@@ -1,0 +1,42 @@
+.layout-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+}
+
+.sidebar {
+  width: 240px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #ddd;
+  padding: 1rem 0;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+}
+
+.main-content {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  // Pour permettre le scroll du contenu
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 3rem; // espace pour le footer
+}
+
+// Ajustement si le footer doit rester en bas
+app-footer {
+  margin-top: auto;
+}
+
+// Bonus : amélioration du comportement si contenu très court
+router-outlet + * {
+  flex: 1 1 auto;
+}

@@ -1,0 +1,39 @@
+<div class="editor-wrapper container py-4">
+  <h2 class="mb-4">
+    {{ isEdit ? '✏️ Modifier un article' : '📝 Nouvel article de blog' }}
+  </h2>
+
+  <form (ngSubmit)="savePost()" *ngIf="!loading" class="blog-form">
+    <div class="mb-3">
+      <label class="form-label">Titre</label>
+      <input class="form-control" type="text" [(ngModel)]="post.title" name="title" required />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Catégorie</label>
+      <input class="form-control" type="text" [(ngModel)]="post.category" name="category" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Contenu</label>
+      <quill-editor
+        [(ngModel)]="post.content"
+        name="content"
+        [style]="{height: '300px'}"
+        [placeholder]="'Rédigez votre article ici...'"
+      ></quill-editor>
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" [(ngModel)]="post.isPublished" name="isPublished" />
+      <label class="form-check-label">Publier cet article</label>
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="saving">
+      {{ saving ? 'Enregistrement...' : '💾 Enregistrer' }}
+    </button>
+    <button class="btn btn-outline-secondary ms-2" type="button" (click)="router.navigate(['/blog'])">
+      ❌ Annuler
+    </button>
+  </form>
+</div>

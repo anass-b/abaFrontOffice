@@ -1,0 +1,50 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="logo">🌩️ Logo</div>
+    <h2 class="title">Créez votre compte</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input type="text" formControlName="lastName" placeholder="Nom" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <input type="text" formControlName="firstName" placeholder="Prénom" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <input type="email" formControlName="email" placeholder="Email" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <input type="text" formControlName="phoneNumber" placeholder="Téléphone" class="form-control" />
+      </div>
+
+      <div class="form-group password-group">
+        <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Mot de passe" class="form-control" />
+        <button type="button" (click)="togglePassword()" class="toggle-btn">
+          {{ showPassword ? '🙈' : '👁️' }}
+        </button>
+      </div>
+
+      <div class="form-group password-group">
+        <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirmer le mot de passe" class="form-control" />
+        <button type="button" (click)="toggleConfirmPassword()" class="toggle-btn">
+          {{ showConfirmPassword ? '🙈' : '👁️' }}
+        </button>
+      </div>
+
+      <button type="submit" [disabled]="loading || registerForm.invalid" class="submit-btn">
+        S'inscrire
+      </button>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <p class="bottom-text">
+        Déjà un compte ? <a [routerLink]="['/login']">Connectez-vous ici</a>
+      </p>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="logo">🌩️ Logo</div>
+    <h2 class="title">Connectez-vous</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input
+          type="email"
+          placeholder="Email"
+          formControlName="email"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group password-group">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="Mot de passe"
+          formControlName="password"
+          class="form-control"
+        />
+        <button type="button" (click)="togglePassword()" class="toggle-btn">
+          {{ showPassword ? '🙈' : '👁️' }}
+        </button>
+      </div>
+
+      <button type="submit" [disabled]="loading || loginForm.invalid" class="submit-btn">
+        Se connecter
+      </button>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <p class="bottom-text">
+        Pas encore inscrit ?
+        <a [routerLink]="['/register']">Créez votre compte</a>
+      </p>
+    </form>
+  </div>
+</div>

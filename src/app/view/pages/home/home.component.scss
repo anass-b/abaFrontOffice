@@ -1,0 +1,208 @@
+.hero {
+  position: relative;
+  background: url('/assets/aba1.jpg') no-repeat center center;
+  background-size: cover;
+  padding: 5rem 2rem;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4); // Overlay pour lisibilité
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin-left: 5%;
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: bold;
+      line-height: 1.3;
+      color: white;
+
+      span {
+        color: #00bfa6;
+      }
+    }
+
+    p {
+      margin-top: 1rem;
+      color: #eee;
+    }
+
+    .btn-primary {
+      background-color: #00bfa6;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      margin-top: 1.5rem;
+      cursor: pointer;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 3rem 1.5rem;
+    text-align: center;
+
+    .hero-content {
+      margin: auto;
+    }
+  }
+}
+
+// SECTIONS
+
+.section {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: auto;
+
+  h2 {
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .see-all {
+      font-size: 0.9rem;
+      text-decoration: underline;
+      color: #00bfa6;
+    }
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+
+    .card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+
+      .thumbnail {
+        height: 120px;
+        background: #f2f2f2;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .badge {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          background: #00bfa6;
+          color: white;
+          padding: 0.2rem 0.5rem;
+          border-radius: 5px;
+          font-size: 0.8rem;
+        }
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      p {
+        font-size: 0.85rem;
+        color: #777;
+      }
+    }
+  }
+}
+
+// TÉMOIGNAGES
+
+.testimonials-grid {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1.5rem;
+
+  .testimonial {
+    text-align: center;
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      background: #ccc;
+      border-radius: 50%;
+      margin: auto;
+    }
+
+    strong {
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    p {
+      color: gold;
+    }
+  }
+}
+
+// FONCTIONNALITÉS
+
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  .feature-col {
+    flex: 1;
+    min-width: 250px;
+
+    span {
+      color: #00bfa6;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+
+      li {
+        margin: 0.5rem 0;
+      }
+    }
+
+    &.highlight {
+      background: #e6f9f7;
+      padding: 1.5rem;
+      border-radius: 10px;
+
+      h4 {
+        margin-bottom: 1rem;
+      }
+
+      .btn-primary {
+        margin-top: 1rem;
+        background-color: #00bfa6;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    }
+  }
+}

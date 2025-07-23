@@ -1,0 +1,22 @@
+.blog-post-page {
+  max-width: 800px;
+
+  h1 {
+    font-weight: 600;
+  }
+
+  .blog-content {
+    font-size: 1.05rem;
+    line-height: 1.7;
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 1rem 0;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+  }
+}

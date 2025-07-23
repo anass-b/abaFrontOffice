@@ -1,0 +1,21 @@
+<div class="container py-4 blog-post-page" *ngIf="!loading && post">
+  <div class="mb-4">
+    <a routerLink="/bloglist" class="btn btn-outline-secondary btn-sm">← Retour au blog</a>
+  </div>
+
+  <h1 class="mb-2">{{ post.title }}</h1>
+
+  <div class="text-muted small mb-3 d-flex flex-wrap gap-3">
+    <span>📅 {{ formatDate(post.publishedAt) }}</span>
+    <span *ngIf="post.category">🏷️ {{ post.category }}</span>
+    <span *ngIf="post.authorId">👤 Auteur #{{ post.authorId }}</span> <!-- Tu peux remplacer par un nom plus tard -->
+  </div>
+
+  <hr />
+
+  <div class="blog-content mt-4" [innerHTML]="post.content"></div>
+</div>
+
+<div *ngIf="!loading && !post" class="text-center text-muted py-5">
+  Article introuvable.
+</div>

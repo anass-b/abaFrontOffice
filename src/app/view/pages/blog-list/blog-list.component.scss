@@ -1,0 +1,38 @@
+.blog-wrapper {
+  .header h2 {
+    font-weight: 600;
+    color: #222;
+  }
+
+  .blog-card {
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      font-size: 0.85rem;
+    }
+  }
+
+  a {
+    color: #00bfa6;
+
+    &:hover {
+      color: #009f8c;
+    }
+  }
+}

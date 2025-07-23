@@ -1,0 +1,58 @@
+<div class="container py-4 subscription-page">
+  <h2 class="mb-4">📦 Choisissez votre abonnement</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card" [class.border-primary]="selectedPlan === 'BASIC'" (click)="selectedPlan = 'BASIC'">
+        <div class="card-body">
+          <h5 class="card-title">Accès Basique</h5>
+          <p class="card-text">Accédez aux contenus gratuits. Aucun engagement requis.</p>
+        </div>
+        <div class="card-footer text-muted">Gratuit</div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card" [class.border-success]="selectedPlan === 'PREMIUM'" (click)="selectedPlan = 'PREMIUM'">
+        <div class="card-body">
+          <h5 class="card-title">Accès Premium</h5>
+          <p class="card-text">Profitez de toutes les vidéos, documents, modules ABLLS et contenus exclusifs.</p>
+        </div>
+        <div class="card-footer text-muted">99 MAD / mois</div>
+      </div>
+    </div>
+  </div>
+
+  <form *ngIf="selectedPlan" (ngSubmit)="submitSubscription()" class="payment-form border rounded p-3 bg-light">
+    <h5>💳 Informations bancaires (simulation)</h5>
+
+    <div class="mb-3">
+      <label>Nom sur la carte</label>
+      <input type="text" class="form-control" [(ngModel)]="paymentInfo.cardHolder" name="cardHolder" required />
+    </div>
+
+    <div class="mb-3">
+      <label>Numéro de carte</label>
+      <input type="text" class="form-control" [(ngModel)]="paymentInfo.cardNumber" name="cardNumber" required />
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Date d’expiration</label>
+        <input type="text" class="form-control" [(ngModel)]="paymentInfo.expiry" name="expiry" required />
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>CVC</label>
+        <input type="text" class="form-control" [(ngModel)]="paymentInfo.cvc" name="cvc" required />
+      </div>
+    </div>
+
+    <button class="btn btn-success w-100" type="submit" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Traitement en cours...' : 'Confirmer mon abonnement' }}
+    </button>
+  </form>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-4 text-center">
+    {{ successMessage }}
+  </div>
+</div>

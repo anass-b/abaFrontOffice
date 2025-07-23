@@ -1,0 +1,118 @@
+<div class="video-library container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="m-0">📽️ Bibliothèque de Vidéos de Formation</h2>
+    <a *ngIf="auth.isAdmin" class="btn btn-success" [routerLink]="['/videos/new']">
+  ➕ Ajouter une vidéo
+</a>
+
+  </div>
+
+  <div class="search-bar mb-4 d-flex justify-content-center">
+    <input
+      class="form-control w-50"
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Rechercher une vidéo, un sujet, un mot-clé..." />
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <div class="categories card p-3">
+        <strong>Catégories</strong>
+        <ul class="list-unstyled mt-2">
+          <li (click)="selectCategory('')" [class.active]="selectedCategory === ''">Toutes les catégories</li>
+          <li *ngFor="let cat of categories" (click)="selectCategory(cat)" [class.active]="selectedCategory === cat">
+            {{ cat }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+      <div *ngIf="loading">Chargement...</div>
+
+      <div class="row" *ngIf="!loading && filteredVideos().length > 0">
+        <div class="col-md-4 mb-4" *ngFor="let video of filteredVideos()">
+          <div class="video-card card h-100 d-flex flex-column">
+            <div class="video-thumbnail" [style.backgroundImage]="'url(' + video.thumbnailUrl + ')'">
+              <div *ngIf="video.isPremium" class="badge premium-badge">Premium</div>
+            </div>
+
+            <div class="card-body flex-grow-1">
+              <h5 class="card-title">{{ video.title }}</h5>
+              <p class="text-muted small">{{ video.category }} · {{ formatDuration(video.duration) }}</p>
+            </div>
+
+            <!-- 👇 Zone des actions -->
+            <div class="card-footer bg-light border-top d-flex justify-content-between px-3">
+              <!-- ▶️ Lire -->
+                     <!-- ▶️ Lire : accessible uniquement si abonné ou pas premium -->
+<!-- ▶️ Lire : seulement si l'utilisateur y a accès -->
+<button
+  class="btn btn-sm btn-outline-primary"
+  (click)="openVideoInNewTab(video.id)"
+  [disabled]="!canAccess(video)"
+  title="Lire dans un nouvel onglet"
+>
+  ▶️ Ouvrir
+</button>
+
+
+
+              <!-- ⬇️ Télécharger si interne -->
+              <a
+                *ngIf="!video.useExternal && video.url"
+                class="btn btn-sm btn-outline-secondary"
+                [href]="video.url"
+                download
+                title="Télécharger la vidéo"
+              >
+                ⬇️
+              </a>
+
+             <!-- ✏️ Modifier : Admin OU propriétaire -->
+<button
+  *ngIf="auth.isAdmin || auth.isOwner({ createdBy: video.createdBy! })"
+  class="btn btn-sm btn-outline-warning"
+  (click)="editVideo(video)"
+  title="Modifier"
+>
+  ✏️
+</button>
+
+<!-- 🗑️ Supprimer : Admin OU propriétaire -->
+<button
+  *ngIf="auth.isAdmin || auth.isOwner({ createdBy: video.createdBy! })"
+  class="btn btn-sm btn-outline-danger"
+  (click)="deleteVideo(video)"
+  title="Supprimer"
+>
+  🗑️
+</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Zone de lecture -->
+      <div *ngIf="videoUrl" class="video-player mt-4 text-center">
+          <h4>Lecture de la Vidéo</h4>
+          <video
+            width="640"
+            controls
+            autoplay
+            [src]="videoUrl"
+            (contextmenu)="$event.preventDefault()"
+          ></video>
+          <div class="mt-2">
+            <button class="btn btn-outline-secondary" (click)="videoUrl = null">❌ Fermer</button>
+          </div>
+        </div>
+
+      <div *ngIf="!loading && filteredVideos().length === 0" class="text-center text-muted">
+        Aucune vidéo trouvée.
+      </div>
+    </div>
+  </div>
+</div>

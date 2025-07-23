@@ -1,0 +1,22 @@
+.subscription-page {
+  .card {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    &.border-primary {
+      border: 2px solid #007bff !important;
+    }
+
+    &.border-success {
+      border: 2px solid #28a745 !important;
+    }
+  }
+
+  .payment-form {
+    max-width: 600px;
+  }
+}
