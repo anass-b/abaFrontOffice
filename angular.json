@@ -111,7 +111,13 @@
                 "glob": "_redirects",
                 "input": "src",
                 "output": ""
-              }
+              },
+              {
+  "glob": "static.json",
+  "input": "src",
+  "output": ""
+}
+
             ],
             "styles": [
               "src/styles.scss"
