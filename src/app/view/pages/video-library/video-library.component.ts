@@ -41,8 +41,8 @@ export class VideoLibraryComponent {
      this.videos = data
   .map(video => ({
     ...video,
-    thumbnailUrl: `http://localhost:5274${video.thumbnailUrl}`,
-    url: video.useExternal ? video.url : `http://localhost:5274${video.url}`
+    thumbnailUrl: `https://ababackoffice.onrender.com${video.thumbnailUrl}`,
+    url: video.useExternal ? video.url : `https://ababackoffice.onrender.com${video.url}`
   }))
   .filter(video =>
     this.auth.isAdmin ||
