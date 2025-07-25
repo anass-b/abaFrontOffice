@@ -1,0 +1,75 @@
+<div class="container py-4">
+  <h3>➕ Nouvelle Tâche ABLLS</h3>
+
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="p-4 bg-white border rounded shadow-sm">
+    <!-- Infos de base -->
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Référence</label>
+        <input class="form-control" formControlName="reference" />
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>Titre *</label>
+        <input class="form-control" formControlName="title" required />
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Description</label>
+      <textarea class="form-control" rows="3" formControlName="description"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Domaine</label>
+      <input class="form-control" formControlName="domain" />
+    </div>
+
+    <!-- Ligne de base -->
+    <h5 class="mt-4">📊 Ligne de base</h5>
+    <textarea class="form-control mb-2" rows="2" formControlName="baselineText"></textarea>
+    <input class="form-control" placeholder="URL vidéo ligne de base" formControlName="baselineVideo" />
+
+    <!-- Matériel -->
+    <h5 class="mt-4">🧰 Matériel Requis</h5>
+   <div *ngFor="let mat of materials.controls; let i = index" class="mb-2">
+      <input class="form-control" [formControl]="getMaterialControl(i)" />
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addMaterial()">+ Ajouter</button>
+
+    <!-- Instructions -->
+    <h5 class="mt-4">📖 Instructions</h5>
+    <textarea class="form-control" rows="4" formControlName="instructions"></textarea>
+
+    <!-- Vidéo d’évaluation -->
+    <h5 class="mt-4">🎯 Vidéo d'Évaluation</h5>
+    <div [formGroup]="evaluationVideoGroup">
+      <input class="form-control mb-2" placeholder="URL vidéo" formControlName="url" />
+      <input class="form-control mb-2" placeholder="Description" formControlName="description" />
+      <input class="form-control mb-2" placeholder="Miniature (URL)" formControlName="thumbnailUrl" />
+    </div>
+
+    <!-- Vidéos Complémentaires -->
+    <h5 class="mt-4">📚 Vidéos Complémentaires</h5>
+    <div *ngFor="let group of complementaryVideos.controls" [formGroup]="asFormGroup(group)" class="mb-3 border p-2 rounded">
+      <input class="form-control mb-1" placeholder="URL vidéo" formControlName="url" />
+      <input class="form-control mb-1" placeholder="Description" formControlName="description" />
+      <input class="form-control mb-1" placeholder="Miniature (URL)" formControlName="thumbnailUrl" />
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addComplementaryVideo()">+ Ajouter une vidéo</button>
+
+    <!-- Vidéos Critères -->
+    <h5 class="mt-4">✅ Vidéos de Critère (max 4)</h5>
+    <div *ngFor="let group of criteriaVideos.controls" [formGroup]="asFormGroup(group)" class="mb-3 border p-2 rounded">
+      <label>{{ group.value.type }}</label>
+      <input class="form-control mb-1" placeholder="URL vidéo" formControlName="url" />
+      <input class="form-control mb-1" placeholder="Description" formControlName="description" />
+      <input class="form-control mb-1" placeholder="Miniature (URL)" formControlName="thumbnailUrl" />
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addCriteriaVideo()">+ Ajouter un critère</button>
+
+    <!-- Action -->
+    <div class="mt-4 d-flex justify-content-end">
+      <button class="btn btn-success" type="submit" [disabled]="taskForm.invalid">✅ Enregistrer</button>
+    </div>
+  </form>
+</div>
