@@ -1,8 +1,10 @@
+import { Category } from "./category.model";
+
 export interface Document {
   id?: number;
   title?: string;
   description?: string;
-  category?: string;
+  categories?: Category[];
   fileUrl?: string;
   isPremium?: boolean;
 

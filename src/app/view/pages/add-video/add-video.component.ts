@@ -3,23 +3,31 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VideoService } from '../../../services/video/video.service';
+import { Category } from '../../../models/category.model';
+import { CategoryService } from '../../../services/category/category.service';
+import { OnInit } from '@angular/core';
+import {NgSelectModule} from '@ng-select/ng-select';
+import { SharedService } from '../../../services/shared/shared.service';
 
 @Component({
   selector: 'app-add-video',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgSelectModule],
   templateUrl: './add-video.component.html',
   styleUrls: ['./add-video.component.scss']
 })
-export class AddVideoComponent {
+export class AddVideoComponent implements OnInit {
   fb = inject(FormBuilder);
   router = inject(Router);
   videoService = inject(VideoService);
+  categoryService = inject(CategoryService);
+  sharedService = inject(SharedService);
+  allCategories: Category[] = [];
 
   videoForm: FormGroup = this.fb.group({
     title: ['', Validators.required],
     description: [''],
-    category: [''],
+    categories: [[]],
     duration: [null],
     isPremium: [false],
     useExternal: [false],
@@ -32,6 +40,20 @@ export class AddVideoComponent {
   uploading = false;
   videoName = '';
   thumbnailName = '';
+
+ ngOnInit() {
+  this.categoryService.getAll().subscribe({
+    next: (cats) => {
+      this.allCategories = cats.map(cat => ({
+        ...cat,
+        name: this.sharedService.fixEncoding(cat.name),
+        description: this.sharedService.fixEncoding(cat.description)
+      }));
+    },
+    error: () => alert('Erreur lors du chargement des catégories')
+  });
+}
+
 
   onThumbnailSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -63,7 +85,10 @@ export class AddVideoComponent {
 
     formData.append('title', values.title);
     formData.append('description', values.description || '');
-    formData.append('category', values.category || '');
+    if (values.categories?.length) {
+      values.categories.forEach((cat: string) => formData.append('categories', cat));
+    }
+
     formData.append('duration', values.duration?.toString() || '0');
     formData.append('isPremium', values.isPremium.toString());
     formData.append('useExternal', values.useExternal.toString());

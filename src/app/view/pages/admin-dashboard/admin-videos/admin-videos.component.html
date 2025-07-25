@@ -1,0 +1,39 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">🎥 Gestion des vidéos</h4>
+  <a class="btn btn-success" routerLink="/videos/new">
+    <i class="bi bi-camera-video-fill me-1"></i> Ajouter une vidéo
+  </a>
+</div>
+
+<div class="table-responsive shadow-sm border rounded">
+  <table class="table table-hover table-striped align-middle mb-0">
+    <thead class="table-dark text-light">
+      <tr>
+        <th>Titre</th>
+        <th>Catégorie</th>
+        <th>Premium</th>
+        <th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let vid of videos">
+        <td>{{ vid.title }}</td>
+        <td>{{ vid.categories }}</td>
+        <td>
+          <i class="bi" [ngClass]="vid.isPremium ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-secondary'"></i>
+        </td>
+        <td class="text-center">
+          <a [routerLink]="['/videos', vid.id, 'view']" class="btn btn-sm btn-outline-primary me-1" title="Voir">
+            <i class="bi bi-eye-fill"></i>
+          </a>
+          <a [routerLink]="['/videos/edit', vid.id]" class="btn btn-sm btn-outline-warning me-1" title="Modifier">
+            <i class="bi bi-pencil-fill"></i>
+          </a>
+          <button (click)="deleteVideo(vid.id)" class="btn btn-sm btn-outline-danger" title="Supprimer">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

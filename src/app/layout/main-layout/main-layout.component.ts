@@ -18,4 +18,15 @@ import { FooterComponent } from '../footer/footer.component';
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+
+   isSidebarVisible = false;
+
+  toggleSidebar() {
+    this.isSidebarVisible = !this.isSidebarVisible;
+  }
+  isMobile(): boolean {
+  return window.innerWidth < 992;
+}
+
+}

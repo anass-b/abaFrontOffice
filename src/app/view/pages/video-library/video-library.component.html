@@ -40,7 +40,10 @@
 
             <div class="card-body flex-grow-1">
               <h5 class="card-title">{{ video.title }}</h5>
-              <p class="text-muted small">{{ video.category }} · {{ formatDuration(video.duration) }}</p>
+              <p class="text-muted small">
+                {{ video.categories?.join(', ') }} · {{ formatDuration(video.duration) }}
+              </p>
+
             </div>
 
             <!-- 👇 Zone des actions -->
@@ -50,25 +53,18 @@
 <!-- ▶️ Lire : seulement si l'utilisateur y a accès -->
 <button
   class="btn btn-sm btn-outline-primary"
-  (click)="openVideoInNewTab(video.id)"
+  (click)="viewVideo(video.id)"
   [disabled]="!canAccess(video)"
-  title="Lire dans un nouvel onglet"
+  title="Lire la vidéo"
 >
-  ▶️ Ouvrir
+  ▶️ Lire
 </button>
 
 
 
-              <!-- ⬇️ Télécharger si interne -->
-              <a
-                *ngIf="!video.useExternal && video.url"
-                class="btn btn-sm btn-outline-secondary"
-                [href]="video.url"
-                download
-                title="Télécharger la vidéo"
-              >
-                ⬇️
-              </a>
+
+              
+              
 
              <!-- ✏️ Modifier : Admin OU propriétaire -->
 <button

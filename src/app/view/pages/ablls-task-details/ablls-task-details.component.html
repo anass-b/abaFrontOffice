@@ -1,0 +1,52 @@
+<div class="container py-4" *ngIf="task">
+  <h3 class="mb-3">{{ task.reference }} - {{ task.title }}</h3>
+
+  <p class="text-muted mb-4">{{ task.description }}</p>
+
+  <!-- ✅ Vidéo d'évaluation principale -->
+  <div *ngIf="evaluationVideo">
+    <h5>🎯 Vidéo d'Évaluation</h5>
+    <video class="w-100 mb-3" controls [src]="evaluationVideo.url"></video>
+    <p class="text-muted">{{ evaluationVideo.description }}</p>
+  </div>
+
+  <!-- ✅ Vidéos Complémentaires -->
+  <div *ngIf="complementaryVideos.length">
+    <h5>📚 Vidéos Complémentaires</h5>
+    <div *ngFor="let vid of complementaryVideos" class="mb-3">
+      <video class="w-100 mb-1" controls [src]="vid.url"></video>
+      <p class="text-muted">{{ vid.description }}</p>
+    </div>
+  </div>
+
+  <!-- ✅ Vidéos Critère -->
+  <div *ngIf="criteriaVideos.length">
+    <h5>✅ Vidéos Critères</h5>
+    <div *ngFor="let crit of criteriaVideos" class="mb-3">
+      <h6>{{ crit.type }}</h6>
+      <video class="w-100 mb-1" controls [src]="crit.url"></video>
+      <p class="text-muted">{{ crit.description }}</p>
+    </div>
+  </div>
+
+  <!-- ✅ Ligne de base -->
+  <div *ngIf="task.baselineText || task.baselineVideo" class="mt-4">
+    <h5>📊 Ligne de base</h5>
+    <p *ngIf="task.baselineText">{{ task.baselineText }}</p>
+    <video *ngIf="task.baselineVideo" class="w-100 mb-3" controls [src]="task.baselineVideo"></video>
+  </div>
+
+  <!-- ✅ Matériel nécessaire -->
+  <div *ngIf="task.materials?.length" class="mt-4">
+    <h5>🧰 Matériel Requis</h5>
+    <ul>
+      <li *ngFor="let mat of task.materials">{{ mat }}</li>
+    </ul>
+  </div>
+
+  <!-- ✅ Instructions détaillées -->
+  <div *ngIf="task.instructions" class="mt-4">
+    <h5>📖 Instructions d'enseignement</h5>
+    <p>{{ task.instructions }}</p>
+  </div>
+</div>

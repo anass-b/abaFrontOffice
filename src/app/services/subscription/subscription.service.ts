@@ -37,6 +37,7 @@ export class SubscriptionService extends SharedService {
       catchError(() => of([]))
     );
   }
+  
 
   // 📄 Obtenir un abonnement par ID
   fetchById(id: number): Observable<Subscription | {}> {
@@ -48,6 +49,17 @@ export class SubscriptionService extends SharedService {
       catchError(() => of({}))
     );
   }
+  // 📦 Obtenir les abonnements d’un utilisateur par son ID
+getSubscriptionsByUserId(userId: number): Observable<Subscription[]> {
+  return this.authService.checkAuthentication().pipe(
+    switchMap((isAuth) => {
+      if (!isAuth) return of([]);
+      return this.http.get<Subscription[]>(`${this.apiUrl}/user/${userId}`);
+    }),
+    catchError(() => of([]))
+  );
+}
+
 
   // 🔁 Modifier un abonnement
   updateSubscription(id: number, subscription: Subscription): Observable<Subscription | {}> {

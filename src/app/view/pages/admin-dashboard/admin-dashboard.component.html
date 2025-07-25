@@ -1,0 +1,39 @@
+<!-- admin-dashboard.component.html -->
+<div class="container py-4">
+  <h2 class="mb-4">🎛 Tableau de Bord Administrateur</h2>
+
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation" *ngFor="let tab of tabs; let i = index">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === i"
+        (click)="activeTab = i"
+        type="button"
+        role="tab"
+      >
+        {{ tab.label }}
+      </button>
+    </li>
+  </ul>
+
+  <div [ngSwitch]="activeTab">
+    <ng-container *ngSwitchCase="0">
+      <app-admin-documents></app-admin-documents>
+    </ng-container>
+    <ng-container *ngSwitchCase="1">
+      <app-admin-videos></app-admin-videos>
+    </ng-container>
+    <ng-container *ngSwitchCase="2">
+      <app-admin-blogs></app-admin-blogs>
+    </ng-container>
+    <ng-container *ngSwitchCase="3">
+      <app-admin-subscriptions></app-admin-subscriptions>
+    </ng-container>
+    <ng-container *ngSwitchCase="4">
+      <app-admin-users></app-admin-users>
+    </ng-container>
+    <ng-container *ngSwitchCase="5">
+      <app-admin-categories></app-admin-categories>
+    </ng-container>
+  </div>
+</div>

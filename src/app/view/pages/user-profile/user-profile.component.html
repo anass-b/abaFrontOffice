@@ -1,0 +1,35 @@
+<div class="container py-4">
+  <h2>👤 Mon Profil</h2>
+
+  <form [formGroup]="userForm" (ngSubmit)="onUpdate()" class="border rounded p-4 bg-white shadow-sm">
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" class="form-control" formControlName="email" readonly />
+    </div>
+    <div class="mb-3">
+      <label>Prénom</label>
+      <input type="text" class="form-control" formControlName="firstName" />
+    </div>
+    <div class="mb-3">
+      <label>Nom</label>
+      <input type="text" class="form-control" formControlName="lastName" />
+    </div>
+    <div class="mb-3">
+      <label>Téléphone</label>
+      <input type="text" class="form-control" formControlName="phoneNumber" />
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="loading || userForm.invalid">
+      {{ loading ? 'Enregistrement...' : 'Mettre à jour' }}
+    </button>
+  </form>
+
+  <div *ngIf="subscriptionInfo" class="mt-4 alert alert-info">
+    <h5>📦 Abonnement actif</h5>
+    <p><strong>Type :</strong> {{ subscriptionInfo.type }}</p>
+    <p><strong>Début :</strong> {{ subscriptionInfo.startDate | date }}</p>
+    <p><strong>Fin :</strong> {{ subscriptionInfo.endDate | date }}</p>
+    <p><strong>Status :</strong> <span class="badge bg-success" *ngIf="subscriptionInfo.isActive">Actif</span>
+    <span class="badge bg-secondary" *ngIf="!subscriptionInfo.isActive">Inactif</span></p>
+  </div>
+</div>

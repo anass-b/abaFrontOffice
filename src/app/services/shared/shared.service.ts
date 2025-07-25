@@ -23,6 +23,21 @@ export class SharedService {
   REFRESH_TOKEN: string = 'RefreshToken';
   AUTH_DATA_KEY: string = 'AuthDataKey';
 
+  decodeHtmlEntities(text: string): string {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
+fixEncoding(text: string | undefined): string {
+  try {
+    return decodeURIComponent(escape(text ?? ''));
+  } catch {
+    return text ?? '';
+  }
+}
+
+
   // 🕓 Dates
   getDateFormat(date: string | Date, format: string = 'yyyy-MM-dd'): string {
     return this.datePipe.transform(date, format) ?? '';

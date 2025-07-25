@@ -5,6 +5,7 @@ export interface AbllsVideo {
   description?: string;
   url?: string;
   thumbnailUrl?: string;
+  useExternal?: boolean;
 
   createdBy?: number;
   createdAt?: string;

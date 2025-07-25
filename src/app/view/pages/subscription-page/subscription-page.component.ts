@@ -30,26 +30,29 @@ export class SubscriptionPageComponent {
   };
 
   submitSubscription() {
-    const user = this.authService.getCurrentUser();
-    if (!user) return;
+  const user = this.authService.getCurrentUser();
+  if (!user || !this.selectedPlan) return;
 
-    this.isSubmitting = true;
+  this.isSubmitting = true;
 
-    const now = new Date();
-    const end = new Date();
-    end.setMonth(now.getMonth() + 1); // +1 mois
+  const now = new Date();
+  const end = new Date();
+  end.setMonth(now.getMonth() + 1); // +1 mois
 
-    this.subscriptionService.addSubscription({
-      userId: user.id,
-      type: this.selectedPlan!,
-      startDate: now.toISOString(),
-      endDate: end.toISOString(),
-      isActive: false // ou true si tu veux l'activer directement
-    }).subscribe(() => {
-      this.isSubmitting = false;
-      this.successMessage = 'Votre demande d’abonnement a bien été enregistrée ✅';
-      this.selectedPlan = null;
-      this.paymentInfo = { cardHolder: '', cardNumber: '', expiry: '', cvc: '' };
-    });
-  }
+  const isActive = this.selectedPlan === 'PREMIUM';
+
+  this.subscriptionService.addSubscription({
+    userId: user.id,
+    type: this.selectedPlan,
+    startDate: now.toISOString(),
+    endDate: end.toISOString(),
+    isActive: isActive
+  }).subscribe(() => {
+    this.isSubmitting = false;
+    this.successMessage = 'Votre demande d’abonnement a bien été enregistrée ✅';
+    this.selectedPlan = null;
+    this.paymentInfo = { cardHolder: '', cardNumber: '', expiry: '', cvc: '' };
+  });
+}
+
 }

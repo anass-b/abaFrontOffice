@@ -1,30 +1,94 @@
-<div class="add-doc-container">
-  <form [formGroup]="documentForm" (ngSubmit)="onSubmit()">
-    <h3>Ajouter un nouveau document</h3>
+<div class="container py-4">
+  <form
+    [formGroup]="documentForm"
+    (ngSubmit)="onSubmit()"
+    class="p-4 border rounded bg-white shadow-sm mx-auto"
+    style="max-width: 600px;"
+  >
+    <h3 class="mb-4 text-center text-primary">📄 Ajouter un nouveau document</h3>
 
-    <label for="title">Titre du document *</label>
-    <input id="title" formControlName="title" type="text" placeholder="Ex. Grille d’évaluation pour enfants autistes" />
+    <!-- Titre -->
+    <div class="mb-3">
+      <label for="title" class="form-label">Titre du document *</label>
+      <input
+        id="title"
+        formControlName="title"
+        type="text"
+        class="form-control"
+        placeholder="Ex. Grille d’évaluation pour enfants autistes"
+      />
+    </div>
 
-    <label for="description">Description</label>
-    <textarea id="description" formControlName="description" rows="4" placeholder="Décrivez le document..."></textarea>
+    <!-- Description -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="form-control"
+        rows="4"
+        placeholder="Décrivez le document..."
+      ></textarea>
+    </div>
 
-    <label for="categories">Catégorie(s)</label>
-    <input id="categories" formControlName="categories" type="text" placeholder="Ex: Grilles ABLLS, Guides Pratiques" />
+    <!-- Catégories -->
+    <div class="mb-3">
+      <label for="categories" class="form-label">Catégorie(s)</label>
+      <ng-select
+        [items]="allCategories"
+        bindLabel="name"
+        bindValue="name"
+        [multiple]="true"
+        formControlName="categories"
+        placeholder="Choisir les catégories"
+        class="w-100"
+      ></ng-select>
+    </div>
 
-    <label for="file">Fichier</label>
-    <input id="file" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" />
-    <p *ngIf="fileName">Fichier sélectionné : {{ fileName }}</p>
+    <!-- Fichier -->
+    <div class="mb-3">
+      <label for="file" class="form-label">Fichier</label>
+      <input
+        id="file"
+        type="file"
+        class="form-control"
+        (change)="onFileSelected($event)"
+        accept=".pdf,.doc,.docx"
+      />
+      <small *ngIf="fileName" class="text-muted mt-1 d-block">
+        📎 Fichier sélectionné : {{ fileName }}
+      </small>
+    </div>
 
-    <div class="premium">
-      <label>
-        <input type="checkbox" formControlName="isPremium" />
-        Premium
+    <!-- Premium -->
+    <div class="form-check mb-4">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        formControlName="isPremium"
+        id="premiumCheck"
+      />
+      <label class="form-check-label" for="premiumCheck">
+        Marquer comme contenu Premium
       </label>
     </div>
 
-    <div class="btn-group">
-      <button type="submit" [disabled]="uploading || documentForm.invalid">Enregistrer</button>
-      <button type="button" class="cancel" (click)="router.navigateByUrl('/documents')">Annuler</button>
+    <!-- Boutons -->
+    <div class="d-flex justify-content-end gap-3">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="uploading || documentForm.invalid"
+      >
+        {{ uploading ? 'Envoi en cours...' : ' Enregistrer' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="router.navigateByUrl('/documents')"
+      >
+        Annuler
+      </button>
     </div>
   </form>
 </div>

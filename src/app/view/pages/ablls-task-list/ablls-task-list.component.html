@@ -1,0 +1,30 @@
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-4">📋 Tâches ABLLS</h3>
+         <a *ngIf="isAdmin$ | async"
+           class="btn btn-success btn-sm" routerLink="/ablls/new">
+             ➕ Ajouter une tache
+           </a>
+    </div>
+  
+
+  <input
+    type="text"
+    [(ngModel)]="search"
+    (input)="filterTasks()"
+    class="form-control mb-3"
+    placeholder="Rechercher une tâche..."
+  />
+
+  <div class="row">
+    <div class="col-md-4 mb-4" *ngFor="let task of filteredTasks">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ task.reference }} - {{ task.title }}</h5>
+          <p class="card-text text-muted">{{ task.domain }}</p>
+          <button class="btn btn-outline-primary" (click)="goToDetail(task.id!)">Voir Détails</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,11 +6,13 @@ import { Router, RouterLink } from '@angular/router';
 import { SharedService } from '../../../services/shared/shared.service';
 import { AuthService } from '../../../services/auth/auth.service';
 import { User } from '../../../models/user.model';
+import { RecaptchaModule } from 'ng-recaptcha';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, RecaptchaModule],
   templateUrl: './register-component.html',
   styleUrls: ['./register-component.scss']
 })
@@ -25,8 +27,11 @@ export class RegisterComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
   errorMessage = '';
+  captchaPassed = false;
+  siteKey = environment.recaptchaSiteKey;
 
   ngOnInit(): void {
+    console.log(this.siteKey)
     this.registerForm = this.fb.group({
       lastName: ['', Validators.required],
       firstName: ['', Validators.required],
@@ -43,6 +48,9 @@ export class RegisterComponent implements OnInit {
 
   toggleConfirmPassword(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
+  }
+  onCaptchaResolved(response: string | null): void {
+  this.captchaPassed = !!response;
   }
 
   onSubmit(): void {

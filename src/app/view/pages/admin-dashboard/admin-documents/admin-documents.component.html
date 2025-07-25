@@ -1,0 +1,49 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">📄 Gestion des documents</h4>
+  <a class="btn btn-success" routerLink="/documents/new">
+    <i class="bi bi-file-earmark-plus-fill me-1"></i> Ajouter un document
+  </a>
+</div>
+
+<div class="table-responsive shadow-sm border rounded">
+  <table class="table table-hover table-striped align-middle mb-0">
+    <thead class="table-dark text-light">
+      <tr>
+        <th scope="col">Titre</th>
+        <th scope="col">Catégories</th>
+        <th scope="col" class="text-center">Premium</th>
+        <th scope="col" class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let doc of documents">
+        <td>{{ doc.title }}</td>
+        <td>
+              <ng-container *ngIf="(doc.categories?.length ?? 0) > 0; else noCategories">
+              <span class="badge bg-primary me-1" *ngFor="let cat of doc.categories">
+                {{ cat }}
+              </span>
+            </ng-container>
+            <ng-template #noCategories>
+              <span class="text-muted small">—</span>
+            </ng-template>
+        </td>
+
+        <td class="text-center">
+          <i class="bi" [ngClass]="doc.isPremium ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-secondary'"></i>
+        </td>
+        <td class="text-center">
+          <a [routerLink]="['/documents', doc.id, 'view']" class="btn btn-sm btn-outline-primary me-1" title="Voir">
+            <i class="bi bi-eye-fill"></i>
+          </a>
+          <a [routerLink]="['/documents/edit', doc.id]" class="btn btn-sm btn-outline-warning me-1" title="Modifier">
+            <i class="bi bi-pencil-fill"></i>
+          </a>
+          <button (click)="deleteDocument(doc.id)" class="btn btn-sm btn-outline-danger" title="Supprimer">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

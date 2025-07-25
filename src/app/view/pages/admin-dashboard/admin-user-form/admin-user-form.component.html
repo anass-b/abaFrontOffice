@@ -1,0 +1,51 @@
+<div class="card">
+  <div class="card-header">
+    {{ userToEdit ? 'Modifier l’utilisateur' : 'Créer un nouvel utilisateur' }}
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label>Prénom</label>
+        <input type="text" class="form-control" formControlName="firstName" />
+      </div>
+
+      <div class="mb-3">
+        <label>Nom</label>
+        <input type="text" class="form-control" formControlName="lastName" />
+      </div>
+
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" formControlName="email" />
+      </div>
+
+      <div class="mb-3">
+        <label>Téléphone</label>
+        <input type="text" class="form-control" formControlName="phoneNumber" />
+      </div>
+
+      <div class="mb-3" *ngIf="!userToEdit">
+        <label>Mot de passe</label>
+        <input type="password" class="form-control" formControlName="passwordHash" />
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" formControlName="isAdmin" id="adminCheck" />
+        <label class="form-check-label" for="adminCheck">Administrateur</label>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" formControlName="isVerified" id="verifyCheck" />
+        <label class="form-check-label" for="verifyCheck">Vérifié</label>
+      </div>
+
+      <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+      <button class="btn btn-primary" [disabled]="loading || userForm.invalid">
+        {{ userToEdit ? 'Mettre à jour' : 'Créer' }}
+      </button>
+    </form>
+  </div>
+</div>

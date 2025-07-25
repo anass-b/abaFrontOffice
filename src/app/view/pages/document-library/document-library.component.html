@@ -10,14 +10,30 @@
   </div>
 
   <div class="row">
-    <div class="col-md-3 mb-3">
-      <div class="categories card p-3">
-        <strong>Catégories</strong>
-        <ul class="list-unstyled mt-2">
-          <li *ngFor="let category of categories">{{ category }}</li>
-        </ul>
-      </div>
-    </div>
+   <!-- Catégories dynamiques -->
+<div class="col-md-3 mb-3">
+  <div class="categories card p-3">
+    <strong>Catégories</strong>
+    <ul class="list-unstyled mt-2">
+      <li
+        [class.text-primary]="selectedCategory === ''"
+        style="cursor:pointer"
+        (click)="onCategorySelected('')"
+      >
+        Toutes
+      </li>
+      <li
+        *ngFor="let category of categories"
+        [class.text-primary]="selectedCategory === category.name"
+        style="cursor:pointer"
+        (click)="onCategorySelected(category.name)"
+      >
+        {{ category.name }}
+      </li>
+    </ul>
+  </div>
+</div>
+
 
     <div class="col-md-9">
       <div class="row">
@@ -42,14 +58,14 @@
   </button>
 
   <!-- ✅ Libre -->
-  <a
-    *ngIf="!doc.isPremium || auth.userSubscription?.isActive"
-    [href]="doc.fileUrl"
-    download
-    class="btn btn-primary w-100"
-  >
-    Télécharger
-  </a>
+  <button
+  *ngIf="!doc.isPremium || auth.userSubscription?.isActive"
+  class="btn btn-primary w-100"
+  (click)="viewDocument(doc.id)"
+>
+  📖 Lire
+</button>
+
 </div>
 
           </div>

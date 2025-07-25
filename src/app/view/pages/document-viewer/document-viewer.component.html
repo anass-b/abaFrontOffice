@@ -1,0 +1,16 @@
+<div class="container py-4" *ngIf="doc">
+  <h3 class="mb-3">{{ doc.title }}</h3>
+  <div class="mb-4 text-muted">{{ doc.description }}</div>
+
+  <div class="document-frame-wrapper">
+    <iframe
+      [src]="(doc?.fileUrl ?? '') | safeUrl"
+      width="100%"
+      height="700px"
+      frameborder="0"
+    ></iframe>
+  </div>
+</div>
+<div *ngIf="!doc" class="text-center text-muted py-5">
+  Document introuvable.
+</div>

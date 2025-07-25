@@ -1,8 +1,10 @@
+import { Category } from "./category.model";
+
 export interface Video {
   id?: number;
   title?: string;
   description?: string;
-  category?: string;
+  categories?: Category[];
   duration?: number;
   url?: string;
   thumbnailUrl?: string;

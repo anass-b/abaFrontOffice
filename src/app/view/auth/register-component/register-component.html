@@ -33,8 +33,14 @@
           {{ showConfirmPassword ? '🙈' : '👁️' }}
         </button>
       </div>
+      <div class="form-group">
+  <re-captcha
+    siteKey="{{ siteKey }}"
+    (resolved)="onCaptchaResolved($event)">
+  </re-captcha>
+</div>
 
-      <button type="submit" [disabled]="loading || registerForm.invalid" class="submit-btn">
+      <button type="submit" [disabled]="loading || registerForm.invalid || !captchaPassed" class="submit-btn">
         S'inscrire
       </button>
 

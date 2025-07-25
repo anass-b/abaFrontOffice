@@ -1,36 +1,19 @@
-<nav class="sidebar">
-  <div class="sidebar-header">
-    <h4>ABA Platform</h4>
+<nav class="sidebar p-3">
+  <div class="sidebar-header mb-4 text-center">
+    <h4 class="fw-bold text-primary">ABA Platform</h4>
   </div>
+
   <ul class="nav flex-column">
-    <li class="nav-item">
-      <a routerLink="/home" class="nav-link">
-        <i class="bi bi-house-door-fill"></i> Accueil
+    <li class="nav-item mb-2" *ngFor="let item of navItems">
+      <a [routerLink]="item.link" class="nav-link d-flex align-items-center gap-2">
+        <i class="bi" [ngClass]="item.icon"></i>
+        <span>{{ item.label }}</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a routerLink="/documents" class="nav-link">
-        <i class="bi bi-file-earmark-text"></i> Documents
-      </a>
-    </li>
-    <li class="nav-item">
-      <a routerLink="/videos" class="nav-link">
-        <i class="bi bi-play-circle"></i> Formations Vidéo
-      </a>
-    </li>
-     <li class="nav-item">
-      <a routerLink="/bloglist" class="nav-link">
-        <i class="bi bi-credit-card"></i> Blog
-      </a>
-    </li>
-    <li class="nav-item">
-      <a routerLink="/subscription" class="nav-link">
-        <i class="bi bi-credit-card"></i> Abonnement
-      </a>
-    </li>
-    <li class="nav-item">
-      <a routerLink="/contact" class="nav-link">
-        <i class="bi bi-envelope"></i> Contact
+
+    <li class="nav-item mt-4" *ngIf="auth.isAdmin$ | async">
+      <a routerLink="/admin" class="nav-link d-flex align-items-center gap-2 text-danger fw-semibold">
+        <i class="bi bi-shield-lock-fill"></i> Administration
       </a>
     </li>
   </ul>

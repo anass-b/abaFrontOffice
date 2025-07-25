@@ -1,21 +1,26 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom px-4">
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm px-3">
   <div class="container-fluid justify-content-between">
+    
+    <!-- Mobile toggler -->
+    <button class="btn d-lg-none" (click)="toggle.emit()">
+      <i class="bi bi-list fs-4"></i>
+    </button>
+
     <span class="navbar-brand fw-bold">ABA Platform</span>
 
     <div class="d-flex align-items-center gap-3">
-
-      <!-- 🔧 Icône de paramètres -->
-      <button class="btn btn-light" title="Paramètres">
+      <!-- Settings -->
+      <button class="btn btn-outline-secondary d-none d-md-inline" title="Paramètres">
         <i class="bi bi-gear-fill fs-5"></i>
       </button>
 
-      <!-- 👤 Icône utilisateur avec dropdown -->
+      <!-- User Dropdown -->
       <div class="dropdown">
-        <button class="btn btn-light dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
           <i class="bi bi-person-circle fs-5"></i>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-          <li><a class="dropdown-item" routerLink="/profile">Voir le profil</a></li>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" [routerLink]="['/profile']">Voir le profil</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><button class="dropdown-item text-danger" (click)="logout()">Déconnexion</button></li>
         </ul>
