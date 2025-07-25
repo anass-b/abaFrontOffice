@@ -34,10 +34,11 @@
         </button>
       </div>
       <div class="form-group">
-  <re-captcha
-    siteKey="{{ siteKey }}"
-    (resolved)="onCaptchaResolved($event)">
-  </re-captcha>
+  <app-recaptcha
+  [siteKey]="siteKey"
+  (verified)="onCaptchaResolved($event)">
+</app-recaptcha>
+
 </div>
 
       <button type="submit" [disabled]="loading || registerForm.invalid || !captchaPassed" class="submit-btn">

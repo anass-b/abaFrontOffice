@@ -6,13 +6,13 @@ import { Router, RouterLink } from '@angular/router';
 import { SharedService } from '../../../services/shared/shared.service';
 import { AuthService } from '../../../services/auth/auth.service';
 import { User } from '../../../models/user.model';
-import { RecaptchaModule } from 'ng-recaptcha';
 import { environment } from '../../../../environments/environments';
+import { RecaptchaComponent } from '../../../components/RecapatchaComponent';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, RecaptchaModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, RecaptchaComponent],
   templateUrl: './register-component.html',
   styleUrls: ['./register-component.scss']
 })
