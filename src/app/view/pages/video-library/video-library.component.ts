@@ -10,6 +10,7 @@ import { CategoryService } from '../../../services/category/category.service';
 
 import { Video } from '../../../models/video.model';
 import { Category } from '../../../models/category.model';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-video-library',
@@ -55,8 +56,8 @@ export class VideoLibraryComponent implements OnInit {
         this.videos = data
           .map(video => ({
             ...video,
-            thumbnailUrl: `http://localhost:5274${video.thumbnailUrl}`,
-            url: video.useExternal ? video.url : `http://localhost:5274${video.url}`
+            thumbnailUrl: `${environment.apiUrl}${video.thumbnailUrl}`,
+            url: video.useExternal ? video.url : `${environment.apiUrl}${video.url}`
           }))
           .filter(video =>
             this.auth.isAdmin ||
