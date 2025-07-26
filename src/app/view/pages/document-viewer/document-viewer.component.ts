@@ -21,19 +21,24 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     document.addEventListener('contextmenu', this.disableRightClick);
     document.addEventListener('keydown', this.disableShortcuts);
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.documentService.fetchDocumentById(id).subscribe({
       next: (data: Document) => {
         // ✅ Corrige l'URL uniquement si elle commence par "/"
         if (data.fileUrl?.startsWith('/')) {
-          data.fileUrl = `${environment.apiUrl.replace('/api', '')}${data.fileUrl}`;
-        }
+        const baseApiUrl = environment.apiUrl.replace('/api', '');
+        data.fileUrl = `${baseApiUrl}/api/document/stream/${data.id}`; // ✅ Force stream
+      }
+
         this.doc = data;
       },
       error: () => console.error("Erreur lors du chargement du document")
     });
   }
+  
 
   disableRightClick = (e: MouseEvent) => e.preventDefault();
 
