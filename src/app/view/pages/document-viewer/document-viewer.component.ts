@@ -29,8 +29,8 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
       next: (data: Document) => {
         // ✅ Corrige l'URL uniquement si elle commence par "/"
         if (data.fileUrl?.startsWith('/')) {
-        const baseApiUrl = environment.apiUrl.replace('/api', '');
-        data.fileUrl = `${baseApiUrl}/api/document/stream/${data.id}`; // ✅ Force stream
+        
+        data.fileUrl = `${environment.fileBaseUrl}/api/document/stream/${data.id}`; // ✅ Force stream
       }
 
         this.doc = data;
