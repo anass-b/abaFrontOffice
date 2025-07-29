@@ -5,7 +5,14 @@
 
   <ul class="nav flex-column">
     <li class="nav-item mb-2" *ngFor="let item of navItems">
-      <a [routerLink]="item.link" class="nav-link d-flex align-items-center gap-2">
+      <a
+        class="nav-link d-flex align-items-center gap-2"
+        [class.text-primary]="item.action === 'back'"
+        [class.fw-bold]="item.action === 'back'"
+        [class.disabled]="!item.link && !item.action"
+        (click)="onNavClick(item)"
+        [attr.routerLink]="item.link || null"
+        style="cursor: pointer;">
         <i class="bi" [ngClass]="item.icon"></i>
         <span>{{ item.label }}</span>
       </a>

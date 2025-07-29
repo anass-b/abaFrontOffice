@@ -1,30 +1,52 @@
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-4">📋 Tâches ABLLS</h3>
-         <a *ngIf="isAdmin$ | async"
-           class="btn btn-success btn-sm" routerLink="/ablls/new">
-             ➕ Ajouter une tache
-           </a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">📋 Domaines ABLLS</h3>
+    <div *ngIf="isAdmin$ | async" class="d-flex gap-2">
+      <a class="btn btn-success btn-sm" routerLink="/ablls/new">➕ Ajouter une tâche</a>
+      <a class="btn btn-success btn-sm" routerLink="/material/new">➕ Ajouter un matériel</a>
     </div>
-  
+  </div>
 
   <input
     type="text"
     [(ngModel)]="search"
-    (input)="filterTasks()"
     class="form-control mb-3"
-    placeholder="Rechercher une tâche..."
+    placeholder="Rechercher ..."
   />
 
-  <div class="row">
-    <div class="col-md-4 mb-4" *ngFor="let task of filteredTasks">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title">{{ task.reference }} - {{ task.title }}</h5>
-          <p class="card-text text-muted">{{ task.domain }}</p>
-          <button class="btn btn-outline-primary" (click)="goToDetail(task.id!)">Voir Détails</button>
+  <div *ngIf="!selectedDomain">
+    <div class="row">
+      <div class="col-md-4 mb-3" *ngFor="let domain of getFilteredDomains() | keyvalue"
+>
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ domain.key }}</h5>
+            <p class="card-text">{{ domain.value.length }} tâche(s)</p>
+            <button class="btn btn-primary btn-sm" (click)="selectDomain(domain.key)">Voir les tâches →</button>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div *ngIf="selectedDomain">
+    <h4 class="mb-3">📌 Tâches du domaine : {{ selectedDomain }}</h4>
+    <button class="btn btn-link mb-3" (click)="clearDomain()">← Retour aux domaines</button>
+
+    <div class="row">
+      <div class="col-md-4 mb-4" *ngFor="let task of getFilteredTasks(selectedDomain)">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ task.code }} - {{ task.title }}</h5>
+            <p class="card-text text-muted">{{ task.domain }}</p>
+            <button class="btn btn-outline-primary" (click)="goToDetail(task.id!)">Voir Détails</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="getFilteredTasks(selectedDomain).length === 0" class="text-muted text-center">
+      Aucun résultat pour ce domaine avec cette recherche.
     </div>
   </div>
 </div>

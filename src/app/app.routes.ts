@@ -19,7 +19,12 @@ import { AdminUserFormComponent } from './view/pages/admin-dashboard/admin-user-
 import { U } from '@angular/cdk/keycodes';
 import { UserProfileComponent } from './view/pages/user-profile/user-profile.component';
 import { AbllsTaskListComponent } from './view/pages/ablls-task-list/ablls-task-list.component';
-import { AbllsTaskFormComponent } from './view/pages/ablls-task-form/ablls-task-form.component';
+import { AddAbllsTaskComponent } from './view/pages/add-ablls-task/add-ablls-task.component';
+import { AddMaterialPhotoComponent } from './view/pages/add-material-photo/add-material-photo.component';
+import { AbllsTaskDetailsComponent } from './view/pages/ablls-task-details/ablls-task-details.component';
+import { EvaluationCriteriaDetailsComponent } from './view/pages/evaluation-criteria-details/evaluation-criteria-details.component';
+import { MaterialListComponent } from './view/pages/material-list/material-list.component';
+import { AbllsTaskByCodeComponent } from './view/pages/ablls-task-by-code/ablls-task-by-code.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
@@ -44,8 +49,14 @@ export const routes: Routes = [
       { path: 'admin' , component:AdminDashboardComponent},
       { path: 'admin/users/create' , component: AdminUserFormComponent},
       { path: 'profile' , component : UserProfileComponent} ,
-      { path: 'ablls' , component:AbllsTaskListComponent},
-      { path: 'ablls/new' , component : AbllsTaskFormComponent}
+      { path: 'domaines' , component:AbllsTaskListComponent},
+      { path: 'ablls', component: AbllsTaskByCodeComponent},
+      { path: 'ablls/new' , component : AddAbllsTaskComponent},
+      { path:'ablls-task/:id', component: AbllsTaskDetailsComponent},
+      { path:'material' , component:MaterialListComponent},
+      { path: 'material/new' , component : AddMaterialPhotoComponent},
+      { path: 'evaluation-criteria/:id', component: EvaluationCriteriaDetailsComponent }
+
 
     ]
   }

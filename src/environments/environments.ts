@@ -1,5 +1,6 @@
  export const environment = {
     production: false,
+    //apiUrll : 'http://localhost:5274',
     //apiUrl: 'http://localhost:5274/api',
     apiUrl:'https://ababackoffice.onrender.com/api',
     fileBaseUrl: 'https://ababackoffice.onrender.com',

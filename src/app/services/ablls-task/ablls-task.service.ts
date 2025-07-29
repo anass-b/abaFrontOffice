@@ -15,7 +15,7 @@ export class AbllsTaskService extends SharedService {
   private auth = inject(AuthService);
   private readonly apiUrl = environment.apiUrl + '/abllstask';
 
-  // 📃 Récupérer toutes les tâches
+  // 📃 Toutes les tâches
   fetchTasks(): Observable<AbllsTask[]> {
     return this.auth.checkAuthentication().pipe(
       switchMap(auth => auth ? this.http.get<AbllsTask[]>(this.apiUrl) : of([])),
@@ -23,7 +23,7 @@ export class AbllsTaskService extends SharedService {
     );
   }
 
-  // 🔍 Récupérer une tâche par ID
+  // 🔍 Par ID
   fetchTaskById(id: number): Observable<AbllsTask | null> {
     return this.auth.checkAuthentication().pipe(
       switchMap(auth => auth ? this.http.get<AbllsTask>(`${this.apiUrl}/${id}`) : of(null)),
@@ -31,15 +31,15 @@ export class AbllsTaskService extends SharedService {
     );
   }
 
-  // ➕ Créer une nouvelle tâche
-  createTask(task: AbllsTask): Observable<AbllsTask | null> {
+  // ➕ Création avec FormData (vidéo, miniature, etc.)
+  createTask(formData: FormData): Observable<AbllsTask | null> {
     return this.auth.checkAuthentication().pipe(
-      switchMap(auth => auth ? this.http.post<AbllsTask>(this.apiUrl, task) : of(null)),
+      switchMap(auth => auth ? this.http.post<AbllsTask>(this.apiUrl, formData) : of(null)),
       catchError(() => of(null))
     );
   }
 
-  // 🔄 Modifier une tâche
+  // 🔄 Mise à jour d’une tâche (structure simple JSON, sans fichiers)
   updateTask(task: AbllsTask): Observable<AbllsTask | null> {
     if (!task.id) return of(null);
     return this.auth.checkAuthentication().pipe(
@@ -48,7 +48,7 @@ export class AbllsTaskService extends SharedService {
     );
   }
 
-  // ❌ Supprimer une tâche
+  // ❌ Suppression
   deleteTask(id: number): Observable<void> {
     return this.auth.checkAuthentication().pipe(
       switchMap(auth => auth ? this.http.delete<void>(`${this.apiUrl}/${id}`) : of()),

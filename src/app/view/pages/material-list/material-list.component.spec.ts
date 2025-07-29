@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AbllsTaskFormComponent } from './ablls-task-form.component';
+import { MaterialListComponent } from './material-list.component';
 
-describe('AbllsTaskFormComponent', () => {
-  let component: AbllsTaskFormComponent;
-  let fixture: ComponentFixture<AbllsTaskFormComponent>;
+describe('MaterialListComponent', () => {
+  let component: MaterialListComponent;
+  let fixture: ComponentFixture<MaterialListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AbllsTaskFormComponent]
+      imports: [MaterialListComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AbllsTaskFormComponent);
+    fixture = TestBed.createComponent(MaterialListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,0 +1,50 @@
+<a class="btn btn-success btn-sm" [routerLink]="['/ablls-task', this.crit.abllsTaskId]">
+  Retour à la tâche
+</a>
+
+<div class="container py-4" *ngIf="crit">
+  <h2 class="text-center mb-4">Critère : {{ crit.label }}</h2>
+
+  <!-- 🎥 Vidéo -->
+  <div class="d-flex justify-content-center mb-4">
+    <iframe
+      *ngIf="crit.useExternalDemonstrationVideo && crit.demonstrationVideoUrl"
+      width="560"
+      height="315"
+      [src]="getSafeUrl(crit.demonstrationVideoUrl!)"
+      frameborder="0"
+      allowfullscreen
+    ></iframe>
+
+    <video
+      *ngIf="!crit.useExternalDemonstrationVideo && crit.demonstrationVideoPath"
+      width="560"
+      height="315"
+      controls
+    >
+      <source [src]="baseUrl + crit.demonstrationVideoPath!" type="video/mp4" />
+      Votre navigateur ne supporte pas la lecture de la vidéo.
+    </video>
+  </div>
+
+  <!-- 📋 Détails techniques -->
+  <ul class="list-group mb-4 text-start mx-auto" style="max-width: 600px;">
+    <li class="list-group-item"><strong>Type de guidance :</strong> {{ crit.guidanceType || 'Non spécifié' }}</li>
+    <li class="list-group-item"><strong>Instruction :</strong> {{ crit.consigne || 'Non fournie' }}</li>
+    <li class="list-group-item"><strong>Réponse attendue :</strong> {{ crit.expectedResponse || 'Non précisée' }}</li>
+  </ul>
+
+  <!-- 🧩 Matériel associé -->
+  <div *ngIf="materials.length">
+    <h4 class="text-center mb-3">Matériels associés</h4>
+    <div class="d-flex justify-content-center flex-wrap gap-3">
+      <div *ngFor="let mat of materials" class="card shadow-sm" style="width: 200px;">
+        <div class="card-body text-center">
+          <h6 class="card-title">{{ mat.name }}</h6>
+          <img *ngIf="mat.fileUrl" [src]="baseUrl + mat.fileUrl" class="img-fluid rounded" style="max-height: 100px;" />
+          <p *ngIf="!mat.fileUrl" class="text-muted small mt-2">Aucune image</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

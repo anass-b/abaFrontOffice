@@ -1,52 +1,51 @@
-<div class="container py-4" *ngIf="task">
-  <h3 class="mb-3">{{ task.reference }} - {{ task.title }}</h3>
 
-  <p class="text-muted mb-4">{{ task.description }}</p>
+   
+<a class="btn btn-primary m-3" routerLink="/ablls">Retour aux taches</a>
+    
 
-  <!-- ✅ Vidéo d'évaluation principale -->
-  <div *ngIf="evaluationVideo">
-    <h5>🎯 Vidéo d'Évaluation</h5>
-    <video class="w-100 mb-3" controls [src]="evaluationVideo.url"></video>
-    <p class="text-muted">{{ evaluationVideo.description }}</p>
+<div class="container py-4 text-center" *ngIf="task; else loading">
+    
+  <h2 class="mb-4">Tâche {{ task.code }} : {{ task.title }}</h2>
+
+  <!-- 🎥 Vidéo -->
+  <div class="d-flex justify-content-center mb-4">
+    <!-- Si Lien externe -->
+    <iframe
+      *ngIf="task.explanationVideoUrl"
+      width="560"
+      height="315"
+      [src]="getSafeUrl(task.explanationVideoUrl!)"
+      frameborder="0"
+      allowfullscreen
+    ></iframe>
+
+    <!-- Si Fichier local -->
+    <video
+      *ngIf="!task.explanationUseExternal && task.explanationVideoPath"
+      width="560"
+      height="315"
+      controls
+    >
+      <source [src]="baseUrl + task.explanationVideoPath!" type="video/mp4" />
+      Votre navigateur ne supporte pas la lecture de la vidéo.
+    </video>
   </div>
 
-  <!-- ✅ Vidéos Complémentaires -->
-  <div *ngIf="complementaryVideos.length">
-    <h5>📚 Vidéos Complémentaires</h5>
-    <div *ngFor="let vid of complementaryVideos" class="mb-3">
-      <video class="w-100 mb-1" controls [src]="vid.url"></video>
-      <p class="text-muted">{{ vid.description }}</p>
-    </div>
-  </div>
-
-  <!-- ✅ Vidéos Critère -->
-  <div *ngIf="criteriaVideos.length">
-    <h5>✅ Vidéos Critères</h5>
-    <div *ngFor="let crit of criteriaVideos" class="mb-3">
-      <h6>{{ crit.type }}</h6>
-      <video class="w-100 mb-1" controls [src]="crit.url"></video>
-      <p class="text-muted">{{ crit.description }}</p>
-    </div>
-  </div>
-
-  <!-- ✅ Ligne de base -->
-  <div *ngIf="task.baselineText || task.baselineVideo" class="mt-4">
-    <h5>📊 Ligne de base</h5>
-    <p *ngIf="task.baselineText">{{ task.baselineText }}</p>
-    <video *ngIf="task.baselineVideo" class="w-100 mb-3" controls [src]="task.baselineVideo"></video>
-  </div>
-
-  <!-- ✅ Matériel nécessaire -->
-  <div *ngIf="task.materials?.length" class="mt-4">
-    <h5>🧰 Matériel Requis</h5>
-    <ul>
-      <li *ngFor="let mat of task.materials">{{ mat }}</li>
-    </ul>
-  </div>
-
-  <!-- ✅ Instructions détaillées -->
-  <div *ngIf="task.instructions" class="mt-4">
-    <h5>📖 Instructions d'enseignement</h5>
-    <p>{{ task.instructions }}</p>
+  <!-- 🔘 Critères -->
+  <div *ngIf="task.evaluationCriterias?.length" class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+    <a
+      *ngFor="let crit of task.evaluationCriterias; let i = index"
+      [routerLink]="['/evaluation-criteria', crit.id]"
+      class="btn btn-primary"
+    >
+      Critère {{ i + 1 }}
+    </a>
   </div>
 </div>
+
+<ng-template #loading>
+  <div class="text-center mt-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">Chargement de la tâche...</p>
+  </div>
+</ng-template>

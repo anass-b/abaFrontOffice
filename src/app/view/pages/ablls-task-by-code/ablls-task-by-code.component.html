@@ -1,0 +1,47 @@
+<div class="container py-4">
+  <h3 class="mb-3">📑 Tâches ABLLS</h3>
+
+  <input
+    type="text"
+    [(ngModel)]="search"
+    class="form-control mb-3"
+    placeholder="Rechercher par code ou titre..."
+  />
+
+  <div *ngIf="!selectedPrefix">
+    <div class="row">
+      <div class="col-md-3 mb-3" *ngFor="let prefix of getFilteredPrefixes() | keyvalue">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Code : {{ prefix.key }}</h5>
+            <p class="card-text">{{ prefix.value.length }} tâche(s)</p>
+            <button class="btn btn-primary btn-sm" (click)="selectPrefix(prefix.key)">
+              Voir les tâches →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="selectedPrefix">
+    <h4 class="mb-3">📌 Tâches avec code commençant par : {{ selectedPrefix }}</h4>
+    <button class="btn btn-link mb-3" (click)="clearPrefix()">← Retour</button>
+
+    <div class="row">
+      <div class="col-md-4 mb-3" *ngFor="let task of getFilteredTasks(selectedPrefix)">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ task.code }} - {{ task.title }}</h5>
+            <p class="card-text text-muted">{{ task.domain }}</p>
+            <button class="btn btn-outline-primary btn-sm" (click)="goToDetail(task.id!)">Détails</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="getFilteredTasks(selectedPrefix).length === 0" class="text-muted text-center">
+      Aucun résultat pour ce code avec cette recherche.
+    </div>
+  </div>
+</div>

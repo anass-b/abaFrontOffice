@@ -1,51 +1,47 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-
-import { AbllsTask } from '../../../models/ablls-task.model';
-import { AbllsVideo } from '../../../models/ablls-video.model';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, RouterModule, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
-import { AbllsVideoService } from '../../../services/ablls-video/ablls-video.service';
+import { AbllsTask } from '../../../models/ablls-task.model';
+import { environment } from '../../../../environments/environments';
+import {inject} from '@angular/core';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-ablls-task-detail',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
+  selector: 'app-ablls-task-details',
   templateUrl: './ablls-task-details.component.html',
-  styleUrls: ['./ablls-task-details.component.scss']
+  standalone: true,
+  imports: [NgIf, NgFor, RouterLink, RouterModule],
+  styleUrls: []
 })
 export class AbllsTaskDetailsComponent implements OnInit {
+  task: AbllsTask | null = null;
+  baseUrl = environment.fileBaseUrl;
   route = inject(ActivatedRoute);
   taskService = inject(AbllsTaskService);
-  videoService = inject(AbllsVideoService);
+  sanitizer = inject(DomSanitizer);
 
-  taskId!: number;
-  task: AbllsTask | null = null;
-  allVideos: AbllsVideo[] = [];
-
+  
   ngOnInit(): void {
-    this.taskId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadData();
+    const taskId = Number(this.route.snapshot.paramMap.get('id'));
+    if (taskId) {
+      this.taskService.fetchTaskById(taskId).subscribe({
+        next: (data) => ( console.log(data?.explanationUseExternal , data?.explanationVideoUrl),this.task = data),
+        error: (err) => console.error('Erreur chargement tâche', err)
+      });
+    }
   }
 
-  loadData(): void {
-    this.taskService.fetchTaskById(this.taskId).subscribe(task => (this.task = task));
-    this.videoService.fetchVideos().subscribe(videos => {
-      this.allVideos = videos.filter(v => v.taskId === this.taskId);
-    });
-  }
+  getSafeUrl(url: string): SafeResourceUrl {
+  const videoId = this.extractYoutubeId(url);
+  const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+  return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+}
 
-  get evaluationVideo(): AbllsVideo | undefined {
-    return this.allVideos.find(v => v.type?.toLowerCase() === 'évaluation');
-  }
+private extractYoutubeId(url: string): string {
+  const regex = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : '';
+}
 
-  get complementaryVideos(): AbllsVideo[] {
-    return this.allVideos.filter(v => v.type?.toLowerCase() === 'complémentaire');
-  }
-
-  get criteriaVideos(): AbllsVideo[] {
-    return this.allVideos
-      .filter(v => v.type?.toLowerCase()?.startsWith('critère'))
-      .slice(0, 4);
-  }
 }

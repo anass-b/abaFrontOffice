@@ -1,0 +1,33 @@
+<div class="container py-4">
+  <h3 class="mb-4 text-center">📦 Liste des Matériels</h3>
+
+  <table class="table table-bordered table-striped table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Fichier</th>
+        <th>Vidéo</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let mat of materials">
+        <td>{{ mat.name }}</td>
+        <td>{{ mat.description || '-' }}</td>
+        <td>
+          <a *ngIf="mat.fileUrl" [href]="mat.fileUrl" target="_blank">📎 Fichier</a>
+          <span *ngIf="!mat.fileUrl">-</span>
+        </td>
+        <td>
+          <a *ngIf="mat.videoUrl" [href]="mat.videoUrl" target="_blank">🎬 Lien</a>
+          <span *ngIf="!mat.videoUrl">-</span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2" (click)="onEdit(mat.id)">Modifier</button>
+          <button class="btn btn-sm btn-danger" (click)="onDelete(mat.id)">Supprimer</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
