@@ -15,6 +15,15 @@ export class BaselineContentService extends SharedService {
   private auth = inject(AuthService);
   private readonly apiUrl = environment.apiUrl + '/baselinecontent';
 
+  fetchAll(): Observable<BaselineContent[]> {
+    return this.auth.checkAuthentication().pipe(
+      switchMap(auth => auth
+        ? this.http.get<BaselineContent[]>(this.apiUrl)
+        : of([])),
+      catchError(() => of([]))
+    );
+  }
+
   // 📄 Récupérer les contenus de ligne de base pour une tâche
   fetchByTaskId(taskId: number): Observable<BaselineContent[]> {
     return this.auth.checkAuthentication().pipe(
@@ -43,7 +52,7 @@ export class BaselineContentService extends SharedService {
   }
 
   // ❌ Supprimer
-  delete(id: number): Observable<void> {
+  delete(id: number | undefined): Observable<void> {
     return this.auth.checkAuthentication().pipe(
       switchMap(auth => auth ? this.http.delete<void>(`${this.apiUrl}/${id}`) : of()),
       catchError(() => of())

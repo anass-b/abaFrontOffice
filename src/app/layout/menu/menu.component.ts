@@ -34,7 +34,10 @@ export class MenuComponent implements OnInit {
     { label: 'Liste des tâches', link: '/ablls', icon: 'bi-list-check' },
     { label: 'Ajouter une tâche', link: '/ablls/new', icon: 'bi-plus-circle' },
     { label: 'Matériel', link: '/material', icon: 'bi-box' },
-    { label: 'Ajouter un Matériel', link: '/material/new', icon: 'bi-box' }
+    { label: 'Ajouter un Matériel', link: '/material/new', icon: 'bi-box' },
+    { label: 'Ligne de base' , link:'/baselines' , icon:'bi-grid'},
+    { label: 'Ajouter Ligne de base', link : '/baseline/new', icon: 'bi-box'}
+    
   ];
 
   ngOnInit(): void {

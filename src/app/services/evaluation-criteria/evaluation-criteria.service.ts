@@ -23,6 +23,16 @@ export class EvaluationCriteriaService extends SharedService {
       materialPhotoId
     });
   }
+  // 📄 Tous les critères (non filtrés par tâche)
+fetchAll(): Observable<EvaluationCriteria[]> {
+  return this.auth.checkAuthentication().pipe(
+    switchMap(auth => auth
+      ? this.http.get<EvaluationCriteria[]>(this.apiUrl)
+      : of([])),
+    catchError(() => of([]))
+  );
+}
+
   fetchById(Id: number): Observable<EvaluationCriteria[]> {
     return this.auth.checkAuthentication().pipe(
       switchMap(auth => auth ? this.http.get<EvaluationCriteria[]>(`${this.apiUrl}/${Id}`) : of([])),

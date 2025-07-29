@@ -1,0 +1,36 @@
+<div class="container py-4">
+  <h3 class="mb-4">📚 Contenus de ligne de base</h3>
+  <table class="table table-bordered table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Tâche</th>
+        <th>Critère</th>
+        <th>Contenu</th>
+        <th>Fichier</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of baselineContents">
+        <td>{{ item.id }}</td>
+        <td>{{ item.abllsTaskId }}</td>
+        <td>{{ item.criteriaId }}</td>
+        <td>{{ item.contentHtml ? (item.contentHtml | slice:0:50) + '...' : '—' }}</td>
+        <td>
+          <a *ngIf="item.fileUrl" [href]="item.fileUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+            📎 Voir
+          </a>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="editBaseline(item.id)">
+            ✏️ Modifier
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteBaseline(item.id)">
+            🗑️ Supprimer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

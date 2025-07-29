@@ -1,0 +1,37 @@
+<div class="container py-4">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-4 border rounded bg-white shadow-sm">
+    <h3 class="text-center mb-4">Ajouter un contenu de ligne de base</h3>
+
+   <!-- 🟢 Choisir une tâche -->
+<!-- Tâche ABLLS -->
+<div class="mb-3">
+  <label class="form-label">Tâche ABLLS *</label>
+  <select class="form-select" formControlName="abllsTaskId" (change)="onTaskSelected($event)">
+    <option [ngValue]="null">-- Choisir une tâche --</option>
+    <option *ngFor="let task of abllsTasks" [value]="task.id">
+      {{ task.code }} - {{ task.title }}
+    </option>
+  </select>
+</div>
+
+<!-- Critère -->
+<div *ngIf="evaluationCriterias.length > 0" class="mb-3">
+  <label class="form-label">Critère d’évaluation *</label>
+  <select class="form-select" formControlName="criteriaId">
+    <option *ngFor="let crit of evaluationCriterias" [value]="crit.id">
+      {{ crit.label }}
+    </option>
+  </select>
+</div>
+
+
+
+    <label class="form-label">Contenu HTML</label>
+    <textarea class="form-control mb-3" formControlName="contentHtml" rows="4" placeholder="Ex : Consigne ou description..."></textarea>
+
+    <label class="form-label">Fichier PDF/Image (facultatif)</label>
+    <input type="file" class="form-control mb-4" (change)="onFileChange($event)" />
+
+    <button type="submit" class="btn btn-success w-100">Enregistrer</button>
+  </form>
+</div>

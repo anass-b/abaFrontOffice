@@ -25,6 +25,8 @@ import { AbllsTaskDetailsComponent } from './view/pages/ablls-task-details/ablls
 import { EvaluationCriteriaDetailsComponent } from './view/pages/evaluation-criteria-details/evaluation-criteria-details.component';
 import { MaterialListComponent } from './view/pages/material-list/material-list.component';
 import { AbllsTaskByCodeComponent } from './view/pages/ablls-task-by-code/ablls-task-by-code.component';
+import { AddBaselineContentComponent } from './view/pages/add-baseline-content/add-baseline-content.component';
+import { BaselineContentListComponent } from './view/pages/baseline-list/baseline-content-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
@@ -55,7 +57,9 @@ export const routes: Routes = [
       { path:'ablls-task/:id', component: AbllsTaskDetailsComponent},
       { path:'material' , component:MaterialListComponent},
       { path: 'material/new' , component : AddMaterialPhotoComponent},
-      { path: 'evaluation-criteria/:id', component: EvaluationCriteriaDetailsComponent }
+      { path: 'evaluation-criteria/:id', component: EvaluationCriteriaDetailsComponent },
+      { path: 'baseline/new' , component:AddBaselineContentComponent},
+      { path: 'baselines' , component : BaselineContentListComponent}
 
 
     ]
