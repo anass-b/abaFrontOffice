@@ -1,0 +1,17 @@
+<div class="container py-4">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-4 border rounded bg-white shadow-sm">
+    <h3 class="text-center mb-4">Ajouter une catégorie</h3>
+
+    <div class="mb-3">
+      <label class="form-label">Nom de la catégorie *</label>
+      <input class="form-control" formControlName="name" placeholder="Ex : Communication" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" formControlName="description" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+  </form>
+</div>

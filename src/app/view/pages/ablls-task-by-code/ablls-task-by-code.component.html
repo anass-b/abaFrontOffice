@@ -1,5 +1,5 @@
 <div class="container py-4">
-  <h3 class="mb-3">📑 Tâches ABLLS</h3>
+  <h3 class="mb-3">📑 Tâches ABLLS par domaine</h3>
 
   <input
     type="text"
@@ -8,14 +8,27 @@
     placeholder="Rechercher par code ou titre..."
   />
 
-  <div *ngIf="!selectedPrefix">
+  <!-- Liste des domaines -->
+  <div *ngIf="!selectedDomainName">
     <div class="row">
-      <div class="col-md-3 mb-3" *ngFor="let prefix of getFilteredPrefixes() | keyvalue">
-        <div class="card h-100 shadow-sm">
+      <div
+        class="col-md-4 mb-3"
+        *ngFor="let domain of getFilteredDomains() | keyvalue"
+      >
+        <div class="card h-100 shadow-sm text-white bg-success">
           <div class="card-body">
-            <h5 class="card-title">Code : {{ prefix.key }}</h5>
-            <p class="card-text">{{ prefix.value.length }} tâche(s)</p>
-            <button class="btn btn-primary btn-sm" (click)="selectPrefix(prefix.key)">
+            <div
+              class="avatar bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center"
+              style="width: 24px; height: 24px; font-weight: bold"
+            >
+               {{ domainMap[domain.key]?.prefix ?? '?' }}
+            </div>
+            <h5 class="card-title mt-2">{{ domain.key }}</h5>
+            <p class="card-text">{{ domain.value.length }} tâche(s)</p>
+            <button
+              class="btn btn-light btn-sm"
+              (click)="selectDomain(domain.key)"
+            >
               Voir les tâches →
             </button>
           </div>
@@ -24,24 +37,38 @@
     </div>
   </div>
 
-  <div *ngIf="selectedPrefix">
-    <h4 class="mb-3">📌 Tâches avec code commençant par : {{ selectedPrefix }}</h4>
-    <button class="btn btn-link mb-3" (click)="clearPrefix()">← Retour</button>
+  <!-- Liste des tâches d'un domaine -->
+  <div *ngIf="selectedDomainName">
+    <h4 class="mb-3">📌 Tâches pour le domaine : {{ selectedDomainName }}</h4>
+    <button class="btn btn-link mb-3" (click)="clearDomain()">← Retour</button>
 
     <div class="row">
-      <div class="col-md-4 mb-3" *ngFor="let task of getFilteredTasks(selectedPrefix)">
+      <div
+        class="col-md-4 mb-4"
+        *ngFor="let task of getFilteredTasks(selectedDomainName)"
+      >
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">{{ task.code }} - {{ task.title }}</h5>
-            <p class="card-text text-muted">{{ task.domain }}</p>
-            <button class="btn btn-outline-primary btn-sm" (click)="goToDetail(task.id!)">Détails</button>
+            <p class="card-text text-muted mb-2">
+              Domaine : {{ task.domain?.name ?? 'Inconnu' }}
+            </p>
+            <button
+              class="btn btn-outline-success btn-sm"
+              (click)="goToDetail(task.id!)"
+            >
+              Voir Détails
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div *ngIf="getFilteredTasks(selectedPrefix).length === 0" class="text-muted text-center">
-      Aucun résultat pour ce code avec cette recherche.
+    <div
+      *ngIf="getFilteredTasks(selectedDomainName).length === 0"
+      class="text-muted text-center"
+    >
+      Aucun résultat pour ce domaine avec cette recherche.
     </div>
   </div>
 </div>

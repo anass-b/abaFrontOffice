@@ -16,7 +16,6 @@ import { DocumentViewerComponent } from './view/pages/document-viewer/document-v
 import { VideoViewerComponent } from './view/pages/video-viewer/video-viewer.component';
 import { AdminDashboardComponent } from './view/pages/admin-dashboard/admin-dashboard.component';
 import { AdminUserFormComponent } from './view/pages/admin-dashboard/admin-user-form/admin-user-form.component';
-import { U } from '@angular/cdk/keycodes';
 import { UserProfileComponent } from './view/pages/user-profile/user-profile.component';
 import { AbllsTaskListComponent } from './view/pages/ablls-task-list/ablls-task-list.component';
 import { AddAbllsTaskComponent } from './view/pages/add-ablls-task/add-ablls-task.component';
@@ -27,6 +26,8 @@ import { MaterialListComponent } from './view/pages/material-list/material-list.
 import { AbllsTaskByCodeComponent } from './view/pages/ablls-task-by-code/ablls-task-by-code.component';
 import { AddBaselineContentComponent } from './view/pages/add-baseline-content/add-baseline-content.component';
 import { BaselineContentListComponent } from './view/pages/baseline-list/baseline-content-list.component';
+import { AddDomainComponent } from './view/pages/add-domain/add-domain.component';
+import { AddCategoryComponent} from './view/pages/add-category/add-category.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
@@ -52,6 +53,7 @@ export const routes: Routes = [
       { path: 'admin/users/create' , component: AdminUserFormComponent},
       { path: 'profile' , component : UserProfileComponent} ,
       { path: 'domaines' , component:AbllsTaskListComponent},
+      { path: 'domaines/new' , component : AddDomainComponent },
       { path: 'ablls', component: AbllsTaskByCodeComponent},
       { path: 'ablls/new' , component : AddAbllsTaskComponent},
       { path:'ablls-task/:id', component: AbllsTaskDetailsComponent},
@@ -59,7 +61,8 @@ export const routes: Routes = [
       { path: 'material/new' , component : AddMaterialPhotoComponent},
       { path: 'evaluation-criteria/:id', component: EvaluationCriteriaDetailsComponent },
       { path: 'baseline/new' , component:AddBaselineContentComponent},
-      { path: 'baselines' , component : BaselineContentListComponent}
+      { path: 'baselines' , component : BaselineContentListComponent},
+      { path: 'category/new' , component : AddCategoryComponent}
 
 
     ]

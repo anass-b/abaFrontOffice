@@ -30,13 +30,15 @@ export class MenuComponent implements OnInit {
 
   abllsNavItems = [
     { label: '🔙 Retour', action: 'back', icon: 'bi-arrow-left' },
-    { label: 'Domaines ABA', link: '/domaines', icon: 'bi-grid' },
+    { label: 'Catégories ABA', link: '/domaines', icon: 'bi-grid' },
     { label: 'Liste des tâches', link: '/ablls', icon: 'bi-list-check' },
     { label: 'Ajouter une tâche', link: '/ablls/new', icon: 'bi-plus-circle' },
     { label: 'Matériel', link: '/material', icon: 'bi-box' },
     { label: 'Ajouter un Matériel', link: '/material/new', icon: 'bi-box' },
     { label: 'Ligne de base' , link:'/baselines' , icon:'bi-grid'},
-    { label: 'Ajouter Ligne de base', link : '/baseline/new', icon: 'bi-box'}
+    { label: 'Ajouter Ligne de base', link : '/baseline/new', icon: 'bi-box'},
+    { label: 'Ajouter Catégorie' , link : '/category/new' , icon: 'bi-box'},
+    { label: 'Ajouter Domaine' , link: '/domaines/new' , icon: 'bi-box'}
     
   ];
 

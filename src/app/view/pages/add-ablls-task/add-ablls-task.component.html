@@ -1,145 +1,110 @@
 <div class="container py-4">
   <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="p-4 border rounded bg-white shadow-sm">
-    <h1 class="text-center">Ajouter une tâche ABLLS-R</h1>
+    <h1 class="text-center mb-4">Créer une tâche ABLLS-R</h1>
 
-    <label>Code de la tâche :</label>
-    <input type="text" formControlName="code" placeholder="Ex : B3" class="form-control">
-
-    <label class="mt-3">Domaine :</label>
-    <select formControlName="domain" class="form-select">
-      <option>Langage réceptif</option>
-      <option>Imitation</option>
-      <option>Demande</option>
-      <option>Dénomination</option>
-      <option>Intraverbal</option>
-      <option>Motricité fine</option>
-      <option>Jeu</option>
-      <option>Autonomie</option>
+    <!-- 🧩 Catégorie -->
+    <label>Catégorie :</label>
+    <select class="form-select" formControlName="categoryId" (change)="onCategoryChange()">
+      <option [ngValue]="null">-- Choisir une catégorie --</option>
+      <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
     </select>
 
-    <label class="mt-3">Nom de la tâche :</label>
-    <input type="text" formControlName="title" placeholder="Ex : Associer des objets" class="form-control">
+    <!-- 🧠 Domaine -->
+    <label class="mt-3">Domaine :</label>
+    <select class="form-select" formControlName="domainId" (change)="onDomainChange()">
+      <option [ngValue]="null">-- Choisir un domaine --</option>
+      <option *ngFor="let dom of filteredDomains" [value]="dom.id">
+        {{ dom.name }} (Préfixe : {{ dom.prefix }})
+      </option>
+    </select>
+
+    <!-- 🧾 Numéro de tâche -->
+    <label class="mt-3">Numéro de tâche :</label>
+    <input type="number" formControlName="taskNumber" class="form-control" placeholder="Ex : 3" (input)="onTaskNumberChange()" />
+
+    <!-- 🔢 Code généré automatiquement -->
+    <div class="form-text mt-1 mb-2">Code généré : <strong>{{ generatedCode }}</strong></div>
+
+    <!-- 📝 Nom de la tâche -->
+    <label>Nom de la tâche :</label>
+    <input type="text" formControlName="title" placeholder="Associer des objets" class="form-control" />
 
     <!-- 🎥 Vidéo explicative -->
-    <label class="mt-3">Vidéo d’explication générale</label>
+    <label class="mt-3">Vidéo explicative :</label>
     <select class="form-select" formControlName="explanationUseExternal" (change)="onExplanationTypeChange($event)">
       <option [ngValue]="true">Lien externe</option>
       <option [ngValue]="false">Fichier local</option>
     </select>
 
     <ng-container *ngIf="taskForm.get('explanationUseExternal')?.value">
-      <input type="url" formControlName="explanationVideoUrl" class="form-control mt-2" placeholder="https://...">
+      <input type="url" formControlName="explanationVideoUrl" class="form-control mt-2" placeholder="https://..." />
     </ng-container>
-
     <ng-container *ngIf="!taskForm.get('explanationUseExternal')?.value">
-      <input type="file" class="form-control mt-2" (change)="onExplanationVideoFileSelected($event)">
+      <input type="file" class="form-control mt-2" (change)="onExplanationVideoFileSelected($event)" />
     </ng-container>
 
-    <!-- 📌 Nombre de critères -->
-    <label class="mt-3">Nombre de critères :</label>
+    <!-- 🧮 Nombre de critères -->
+    <label class="mt-4">Nombre souhaité de critères :</label>
     <select class="form-select" [value]="nbCriteres" (change)="onCriteriaCountChange($event)">
-
       <option [value]="2">2</option>
       <option [value]="3">3</option>
       <option [value]="4">4</option>
     </select>
 
-    <!-- 📋 Critères -->
-    <!-- 📋 Critères enrichis -->
-<div formArrayName="evaluationCriterias" *ngFor="let crit of evaluationCriterias.controls; let i = index">
-  <div [formGroupName]="i" class="border rounded p-3 my-3">
-    <h5>Critère {{ i + 1 }}</h5>
+    <!-- 📋 Liste des critères -->
+    <label class="mt-4">Liste des critères :</label>
+    <table class="table table-bordered table-sm mt-2">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Réponse attendue</th>
+          <th>Vidéo</th>
+          <th>Matériel</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let crit of evaluationCriterias; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ crit.label }}</td>
+          <td>{{ crit.expectedResponse }}</td>
+          <td>
+            <ng-container *ngIf="crit.useExternalDemonstrationVideo">🌐 Lien</ng-container>
+            <ng-container *ngIf="!crit.useExternalDemonstrationVideo">📁 Fichier</ng-container>
+          </td>
+          <td>{{ crit.materialPhotoIds?.length || 0 }}</td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteCriteria(i)">Supprimer</button>
+          </td>
+        </tr>
+        <tr *ngIf="evaluationCriterias.length === 0">
+          <td colspan="6" class="text-center text-muted">Aucun critère ajouté</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <label>Nom du critère (label) :</label>
-    <input type="text" formControlName="label" class="form-control mb-2" placeholder="Ex : Associer formes">
+    <!-- ➕ Ajouter critère -->
+    <div class="text-center mt-3">
+      <button type="button" class="btn btn-outline-primary" (click)="openAddCriteriaDialog()"
+        [disabled]="evaluationCriterias.length >= nbCriteres">+ Ajouter un critère</button>
+    </div>
 
-    <label>Type de vidéo :</label>
-<select class="form-select mb-2" [formControlName]="'useExternalDemonstrationVideo'" (change)="onCriteriaVideoTypeChange($event, i)">
-  <option [ngValue]="true">Lien externe</option>
-  <option [ngValue]="false">Fichier local</option>
-</select>
+    <!-- 📌 Statut -->
+    <div class="mt-3">
+      <label>Statut automatique :</label>
+      <div class="form-control-plaintext">
+        {{ evaluationCriterias.length >= nbCriteres ? '✅ Complet' : '🕐 En cours de création' }}
+      </div>
+    </div>
 
-<!-- Champ URL si externe -->
-<ng-container *ngIf="evaluationCriterias.at(i).get('useExternalDemonstrationVideo')?.value">
-  <label>Vidéo démonstration (URL) :</label>
-  <input type="url" formControlName="demonstrationVideoUrl" class="form-control mb-2" placeholder="https://...">
-</ng-container>
-
-<!-- Champ Fichier si local -->
-<ng-container *ngIf="!evaluationCriterias.at(i).get('useExternalDemonstrationVideo')?.value">
-  <label>Vidéo démonstration (fichier) :</label>
-  <input type="file" class="form-control mb-2" (change)="onDemonstrationVideoFileSelected($event, i)">
-</ng-container>
-
-
-    <label>Consigne :</label>
-<textarea formControlName="consigne" class="form-control mb-2" placeholder="Décrivez la consigne..."></textarea>
-
-<label>Réponse attendue :</label>
-<select formControlName="expectedResponse" class="form-select mb-2">
-  <option>Pointage</option>
-  <option>Don</option>
-  <option>Verbalisation</option>
-  <option>Imitation</option>
-</select>
-
-
-    <label>Type de guidance :</label>
-    <select formControlName="guidanceType" class="form-select mb-2">
-      <option>Aucune</option>
-      <option>Verbale</option>
-      <option>Gestuelle</option>
-      <option>Physique partielle</option>
-      <option>Physique totale</option>
-    </select>
-
-    <label>Taux de réussite attendu (%) :</label>
-    <input type="number" formControlName="successRate" class="form-control mb-3" min="0" max="100">
-
-    <label class="mt-3">Matériel associé :</label>
-    
-        <div *ngIf="materialList.length > 0; else loadingMaterials">
-  <div *ngFor="let material of materialList" class="form-check d-flex align-items-center mb-2">
-    <input
-      class="form-check-input me-2"
-      type="checkbox"
-      [value]="material.id"
-      (change)="onMaterialToggle($event, i)"
-      [id]="'material_' + i + '_' + material.id"
-    />
-
-    <label class="form-check-label me-3" [for]="'material_' + i + '_' + material.id">
-      {{ material.name }}
-    </label>
-
-    <!-- ✅ Affichage image si disponible -->
-    <img
-      *ngIf="material.fileUrl"
-      [src]="baseUrl + material.fileUrl"
-      [alt]="material.name"
-      class="img-thumbnail"
-      style="max-height: 60px; max-width: 100px;"
-    />
-  </div>
-</div>
-<ng-template #loadingMaterials>
-  <p class="text-muted">Chargement du matériel en cours...</p>
-</ng-template>
-
-   
-  </div>
-</div>
-
-
-
-
-    <!-- 📝 Observations -->
+    <!-- 📝 Description -->
     <label class="mt-3">Observations :</label>
     <textarea formControlName="description" rows="3" class="form-control"></textarea>
 
-    <!-- 📤 Submit -->
+    <!-- ✅ Bouton submit -->
     <div class="text-center mt-4">
-      <button type="submit" class="btn btn-success">Ajouter la tâche</button>
+      <button type="submit" class="btn btn-success">✅ Enregistrer la tâche</button>
     </div>
   </form>
 </div>

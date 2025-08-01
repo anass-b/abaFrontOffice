@@ -1,8 +1,5 @@
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">📋 Domaines ABLLS</h3>
-    
-  </div>
+  <h3 class="mb-3">📚 Catégories ABLLS</h3>
 
   <input
     type="text"
@@ -11,39 +8,57 @@
     placeholder="Rechercher ..."
   />
 
-  <div *ngIf="!selectedDomain">
+  <!-- Catégories -->
+  <div *ngIf="!selectedCategory && !selectedDomain">
     <div class="row">
-      <div class="col-md-4 mb-3" *ngFor="let domain of getFilteredDomains() | keyvalue"
->
+      <div class="col-md-4 mb-3" *ngFor="let category of getFilteredCategories()">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">{{ domain.key }}</h5>
-            <p class="card-text">{{ domain.value.length }} tâche(s)</p>
-            <button class="btn btn-primary btn-sm" (click)="selectDomain(domain.key)">Voir les tâches →</button>
+            <h5 class="card-title">{{ category }}</h5>
+            <p class="card-text">{{ getTotalTasksInCategory(category) }} tâche(s)</p>
+            <button class="btn btn-primary btn-sm" (click)="selectCategory(category)">Voir les domaines →</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Domaines -->
+  <div *ngIf="selectedCategory && !selectedDomain">
+    <h4 class="mb-3">📁 Domaines de la catégorie : {{ selectedCategory }}</h4>
+    <button class="btn btn-link mb-3" (click)="clearCategory()">← Retour aux catégories</button>
+
+    <div class="row">
+      <div class="col-md-4 mb-3" *ngFor="let domain of getDomainsForCategory(selectedCategory)">
+        <div class="card h-100 shadow-sm text-white bg-dark">
+          <div class="card-body">
+            <div class="avatar bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+              {{ domainMap[domain]?.prefix }}
+
+            </div>
+            <h5 class="card-title mt-2">{{ domain }}</h5>
+            <p class="card-text">{{ groupedByCategory[selectedCategory][domain].length }} tâche(s)</p>
+            <button class="btn btn-info btn-sm" (click)="selectDomain(domain)">Ouvrir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tâches -->
   <div *ngIf="selectedDomain">
     <h4 class="mb-3">📌 Tâches du domaine : {{ selectedDomain }}</h4>
     <button class="btn btn-link mb-3" (click)="clearDomain()">← Retour aux domaines</button>
 
     <div class="row">
-      <div class="col-md-4 mb-4" *ngFor="let task of getFilteredTasks(selectedDomain)">
+      <div class="col-md-4 mb-4" *ngFor="let task of getTasksForDomain(selectedCategory!, selectedDomain)">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">{{ task.code }} - {{ task.title }}</h5>
-            <p class="card-text text-muted">{{ task.domain }}</p>
-            <button class="btn btn-outline-primary" (click)="goToDetail(task.id!)">Voir Détails</button>
+            <button class="btn btn-outline-primary btn-sm" (click)="goToDetail(task.id!)">Voir Détails</button>
           </div>
         </div>
       </div>
-    </div>
-
-    <div *ngIf="getFilteredTasks(selectedDomain).length === 0" class="text-muted text-center">
-      Aucun résultat pour ce domaine avec cette recherche.
     </div>
   </div>
 </div>

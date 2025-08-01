@@ -1,13 +1,23 @@
+// ✅ Composant AddAbllsTaskComponent avec filtrage par catégorie, génération automatique du code, liste des critères et ajout via modale
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MaterialPhoto } from '../../../models/material-photo.model';
+import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
+import { CategoryService } from '../../../services/category/category.service';
+import { DomainService } from '../../../services/domain/domain.service';
 import { MaterialPhotoService } from '../../../services/material-photo/material-photo.service';
-import {environment } from '../../../../environments/environments';
 import { EvaluationCriteriaService } from '../../../services/evaluation-criteria/evaluation-criteria.service';
+import { MaterialPhoto } from '../../../models/material-photo.model';
+import { Domain } from '../../../models/domain.model';
+import { Category } from '../../../models/category.model';
+import { EvaluationCriteria } from '../../../models/evaluation-criteria.model';
+import { environment } from '../../../../environments/environments';
+import { MatDialog } from '@angular/material/dialog';
+import { AddCriteriaDialogComponent } from '../../dialogs/add-criteria-dialog/add-criteria-dialog.component';
+
+
 
 @Component({
   selector: 'app-add-ablls-task',
@@ -17,120 +27,144 @@ import { EvaluationCriteriaService } from '../../../services/evaluation-criteria
 })
 export class AddAbllsTaskComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private taskService = inject(AbllsTaskService);
   private router = inject(Router);
-  materialService = inject(MaterialPhotoService);
-  evaluationCriteriaService = inject(EvaluationCriteriaService);
+  private taskService = inject(AbllsTaskService);
+  private categoryService = inject(CategoryService);
+  private domainService = inject(DomainService);
+  private materialService = inject(MaterialPhotoService);
+  private evaluationService = inject(EvaluationCriteriaService);
+  dialog = inject(MatDialog);
+
   baseUrl = environment.fileBaseUrl;
 
   taskForm!: FormGroup;
-  nbCriteres: number = 2;
   materialList: MaterialPhoto[] = [];
-  materials: MaterialPhoto[] = [];
-
+  categories: Category[] = [];
+  domains: Domain[] = [];
+  filteredDomains: Domain[] = [];
+  evaluationCriterias: EvaluationCriteria[] = [];
+  generatedCode = '';
+  nbCriteres = 0;
 
   ngOnInit(): void {
     this.initForm();
-    this.setCriteres(this.nbCriteres);
-    this.materialService.fetchAll().subscribe({
-  next: (data) => {
-    this.materialList = data ?? [];
-  },
-  error: () => {
-    this.materialList = [];
-  }
-});
-
-
+    this.fetchCategories();
+    this.fetchDomains();
+    this.fetchMaterials();
   }
 
   initForm(): void {
     this.taskForm = this.fb.group({
-      code: ['', Validators.required],
+      categoryId: [null, Validators.required],
+      domainId: [null, Validators.required],
+      taskNumber: [null, Validators.required],
+      code: [{ value: '', disabled: true }],
       title: ['', Validators.required],
-      domain: [''],
+      nbCriteres: [2],
+      description: [''],
       explanationUseExternal: [true],
       explanationVideoUrl: [''],
       explanationVideoFile: [null],
-      description: [''],
-      material: [''],
-      materialUrl: [''],
-      evaluationCriterias: this.fb.array([])
+      status: ['']
     });
   }
- onMaterialToggle(event: any, index: number): void {
-  const control = this.evaluationCriterias.at(index).get('materialPhotoIds');
-  const array = control!.value as number[];
-  const materialId = parseInt(event.target.value, 10);
 
-  const updated = event.target.checked
-    ? Array.from(new Set([...array, materialId])) // empêche les doublons
-    : array.filter(id => id !== materialId);
-
-  control!.setValue(updated);
-}
-
-
-  get evaluationCriterias(): FormArray {
-    return this.taskForm.get('evaluationCriterias') as FormArray;
+  fetchCategories(): void {
+    this.categoryService.getAll().subscribe(cats => this.categories = cats);
   }
 
- onCriteriaCountChange(event: Event): void {
-  const target = event.target as HTMLSelectElement;
-  this.nbCriteres = parseInt(target.value, 10);
-  this.setCriteres(this.nbCriteres);
+  fetchDomains(): void {
+    this.domainService.getAll().subscribe(domains => {
+      this.domains = domains;
+      this.filterDomains();
+    });
+  }
+  updateGeneratedCode(): void {
+  const domainId = this.taskForm.get('domainId')?.value;
+  console.log("domainid" , domainId)
+  const taskNum = this.taskForm.get('taskNumber')?.value;
+  console.log("tasknum" , taskNum);
+
+  const domain = this.domains.find(d => d.id === Number(domainId));
+  console.log("domain name :" , domain)
+  if (domain && taskNum != null) {
+    const code = `${domain.prefix}${taskNum}`;
+    this.taskForm.get('code')?.setValue(code);
+    this.generatedCode = code;
+    console.log('Code généré:', code);
+  } else {
+    this.taskForm.get('code')?.setValue('');
+    this.generatedCode = '';
+    console.log('Code non généré, domaine ou numéro de tâche manquant');
+  }
 }
 
 
- setCriteres(count: number): void {
-  const array: FormGroup[] = [];
+  fetchMaterials(): void {
+    this.materialService.fetchAll().subscribe(data => this.materialList = data);
+  }
+ 
+  onCategoryChange(): void {
+    this.filterDomains();
+    this.taskForm.patchValue({ domainId: null });
+  }
 
-  for (let i = 0; i < count; i++) {
-    array.push(
-  this.fb.group({
-    label: this.fb.control('', Validators.required),
-    useExternalDemonstrationVideo: this.fb.control(true),
-    demonstrationVideoUrl: this.fb.control(''),
-    demonstrationVideoFile: this.fb.control(null),
-    demonstrationVideoPath: this.fb.control(''),
-
-    consigne: this.fb.control(''),                   
-    expectedResponse: this.fb.control('Pointage'),   
-
-    guidanceType: this.fb.control('Aucune'),
-    successRate: this.fb.control(80),
-    materialPhotoIds: this.fb.control([])
-  })
-);
+  filterDomains(): void {
+   const selectedCatId = Number(this.taskForm.get('categoryId')?.value);
+  this.filteredDomains = this.domains.filter(d => d.categoryId === selectedCatId);
 
   }
 
-  this.taskForm.setControl('evaluationCriterias', this.fb.array(array));
-}
-onCriteriaVideoTypeChange(event: Event, index: number): void {
-  const isExternal = (event.target as HTMLSelectElement).value === 'true';
-  const control = this.evaluationCriterias.at(index);
+  onDomainChange(): void {
+    this.updateGeneratedCode();
 
-  control.patchValue({
-    useExternalDemonstrationVideo: isExternal,
-    demonstrationVideoUrl: '',
-    demonstrationVideoFile: null
+  }
+
+  onTaskNumberChange(): void {
+    this.updateGeneratedCode();
+
+  }
+
+  openAddCriteriaDialog(): void {
+  const dialogRef = this.dialog.open(AddCriteriaDialogComponent, {
+    width: '700px',
+    data: {}
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.addCriteria(result);
+    }
   });
 }
-
-onDemonstrationVideoFileSelected(event: any, index: number): void {
-  const file = event.target.files?.[0];
-  if (file) {
-    this.evaluationCriterias.at(index).patchValue({ demonstrationVideoFile: file });
+  onCriteriaCountChange(event: Event): void {
+  const value = (event.target as HTMLSelectElement).value;
+  this.nbCriteres = Number(value);
+  this.updateTaskStatus();
   }
-}
 
+  deleteCriteria(index: number): void {
+    this.evaluationCriterias.splice(index, 1);
+    this.updateTaskStatus();
+  }
+
+  addCriteria(crit: EvaluationCriteria): void {
+    if (this.evaluationCriterias.length < this.taskForm.get('nbCriteres')?.value) {
+      this.evaluationCriterias.push(crit);
+    }
+    this.updateTaskStatus();
+  }
+
+  updateTaskStatus(): void {
+    const defined = this.evaluationCriterias.length;
+    const required = this.taskForm.get('nbCriteres')?.value;
+    const status = defined < required ? 'En cours de création' : 'Complet';
+    this.taskForm.get('status')?.setValue(status);
+  }
 
   onExplanationVideoFileSelected(event: any): void {
     const file = event.target.files?.[0];
-    if (file) {
-      this.taskForm.patchValue({ explanationVideoFile: file });
-    }
+    if (file) this.taskForm.patchValue({ explanationVideoFile: file });
   }
 
   onExplanationTypeChange(event: Event): void {
@@ -142,120 +176,80 @@ onDemonstrationVideoFileSelected(event: any, index: number): void {
     });
   }
 
-onSubmit(): void {
+ onSubmit(): void {
   if (this.taskForm.invalid) return;
 
-  const formValue = this.taskForm.value;
-
+  const formValue = this.taskForm.getRawValue();
   const payload: any = {
+    ...formValue,
     code: formValue.code,
-    title: formValue.title,
-    domain: formValue.domain,
     useExternalExplanationVideo: formValue.explanationUseExternal,
-    description: formValue.description,
-    materialPhotos: [
-      {
-        name: 'Matériel principal',
-        description: formValue.material,
-        fileUrl: formValue.materialUrl
-      }
-    ],
-   evaluationCriterias: formValue.evaluationCriterias.map((crit: any) => ({
-  label: crit.label,
-  useExternalDemonstrationVideo: crit.useExternalDemonstrationVideo,
-  demonstrationVideoUrl: crit.demonstrationVideoUrl,
-  demonstrationVideoFile: crit.demonstrationVideoFile,
-  demonstrationVideoPath: crit.demonstrationVideoPath,
-
-  consigne: crit.consigne,
-  expectedResponse: crit.expectedResponse,
-
-  guidanceType: crit.guidanceType,
-  successRate: crit.successRate,
-}))
-
+    evaluationCriterias: this.evaluationCriterias
   };
-
-  if (formValue.explanationUseExternal) {
-    payload.explanationVideoUrl = formValue.explanationVideoUrl;
-  } else if (formValue.explanationVideoFile) {
-    payload.explanationVideoFile = formValue.explanationVideoFile;
-  }
 
   const formData = this.convertToFormData(payload);
 
-  // Ajoute les MaterialPhotoIds dans le formData (pour le backend principal uniquement)
-  formValue.evaluationCriterias.forEach((crit: any, i: number) => {
-    crit.materialPhotoIds.forEach((id: number, j: number) => {
-      formData.append(`evaluationCriterias[${i}].MaterialPhotoIds[${j}]`, id.toString());
-    });
-  });
-
-  // 📦 Envoie la tâche complète
   this.taskService.createTask(formData).subscribe({
-    next: (createdTask) => {
-      const criterias = createdTask?.evaluationCriterias;
-      const linkRequests: Promise<any>[] = [];
+    next: (response) => {
+      const createdCriteria = response?.evaluationCriterias;
+      const allLinks: { evaluationCriteriaId: number, materialPhotoId: number }[] = [];
 
-      // 🔁 Pour chaque critère, envoie les liens vers le controller spécifique
-      if (criterias) {
-        formValue.evaluationCriterias.forEach((crit: any, i: number) => {
-          const criteriaId = criterias[i]?.id;
-          if (!criteriaId) return;
-
-          crit.materialPhotoIds.forEach((materialId: number) => {
-            console.log('Envoi lien:', { criteriaId, materialId });
-
-            linkRequests.push(
-              
-              this.evaluationCriteriaService.createLink(criteriaId, materialId).toPromise()
-            );
+      createdCriteria?.forEach((critFromApi: any, i: number) => {
+        const localCrit = this.evaluationCriterias[i];
+        if (localCrit.materialPhotoIds?.length) {
+          localCrit.materialPhotoIds.forEach((matId: number) => {
+            allLinks.push({
+              evaluationCriteriaId: critFromApi.id,
+              materialPhotoId: matId
+            });
           });
-        });
-      }
-
-      Promise.all(linkRequests)
-        .then(() => this.router.navigate(['/ablls']))
-        .catch(err => console.error('Erreur liaison critère-matériel', err));
-    },
-    error: (err) => console.error('Erreur lors de la création de la tâche', err)
-  });
-}
-
-
-
-
-private convertToFormData(data: any, formData: FormData = new FormData(), parentKey: string | null = null): FormData {
-  Object.keys(data).forEach(key => {
-    const value = data[key];
-    const formKey = parentKey ? `${parentKey}[${key}]` : key;
-
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        const arrayKey = `${formKey}[${index}]`;
-        if (item instanceof File) {
-          formData.append(arrayKey, item);
-        } else if (typeof item === 'object' && item !== null) {
-          this.convertToFormData(item, formData, arrayKey);
-        } else {
-          formData.append(arrayKey, item);
         }
       });
-    } else if (value instanceof File) {
-      formData.append(formKey, value);
-    } else if (typeof value === 'object' && value !== null) {
-      this.convertToFormData(value, formData, formKey);
-    } else if (value !== undefined && value !== null) {
-      formData.append(formKey, value);
-    }
-  });
 
-  return formData;
+      Promise.all(
+        allLinks.map(link =>
+          this.evaluationService
+            .createLink(link.evaluationCriteriaId, link.materialPhotoId)
+            .toPromise()
+        )
+      ).then(() => {
+        this.router.navigate(['/ablls']);
+      }).catch(err => {
+        console.error('Erreur lors de la liaison critère-matériel', err);
+      });
+    },
+    error: err => console.error('Erreur lors de la création de la tâche', err)
+  });
 }
 
 
 
 
+  private convertToFormData(data: any, formData: FormData = new FormData(), parentKey: string | null = null): FormData {
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      const formKey = parentKey ? `${parentKey}[${key}]` : key;
 
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const arrayKey = `${formKey}[${index}]`;
+          if (item instanceof File) {
+            formData.append(arrayKey, item);
+          } else if (typeof item === 'object' && item !== null) {
+            this.convertToFormData(item, formData, arrayKey);
+          } else {
+            formData.append(arrayKey, item);
+          }
+        });
+      } else if (value instanceof File) {
+        formData.append(formKey, value);
+      } else if (typeof value === 'object' && value !== null) {
+        this.convertToFormData(value, formData, formKey);
+      } else if (value !== undefined && value !== null) {
+        formData.append(formKey, value);
+      }
+    });
 
+    return formData;
+  }
 }

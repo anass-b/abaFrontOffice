@@ -1,0 +1,28 @@
+<div class="container py-4">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-4 border rounded bg-white shadow-sm">
+    <h3 class="text-center mb-4">Ajouter un domaine</h3>
+
+    <div class="mb-3">
+      <label class="form-label">Nom du domaine *</label>
+      <input class="form-control" formControlName="name" placeholder="Ex : Imitation" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Préfixe *</label>
+      <input class="form-control" formControlName="prefix" placeholder="Ex : B" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Catégorie *</label>
+      <select class="form-select" formControlName="categoryId">
+        <option [ngValue]="null">-- Choisir une catégorie --</option>
+        <option *ngFor="let cat of categories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+  </form>
+</div>
+    

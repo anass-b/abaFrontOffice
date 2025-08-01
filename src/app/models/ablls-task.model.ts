@@ -1,6 +1,7 @@
 import { EvaluationCriteria } from './evaluation-criteria.model';
 import { MaterialPhoto } from './material-photo.model';
 import { BaselineContent } from './baseline-content.model';
+import { Domain } from './domain.model';
 
 export interface AbllsTask {
   id?: number;
@@ -8,7 +9,9 @@ export interface AbllsTask {
   reference?: string;
   title: string;
   description?: string;
-  domain?: string;
+  domainId: number;
+  domain?: Domain;
+
   explanationVideoUrl?: string;
   explanationVideoPath?: string;
   explanationVideoFile?: File;
@@ -20,6 +23,10 @@ export interface AbllsTask {
   exampleConsigne?: string;
   expectedResponseType?: string;
   guidanceType?: string;
+
+  expectedCriteriaCount?: number;
+  status?: string;
+
 
   baselineContent?: BaselineContent;
   evaluationCriterias?: EvaluationCriteria[];

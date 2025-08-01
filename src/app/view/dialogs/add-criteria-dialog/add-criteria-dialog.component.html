@@ -1,0 +1,71 @@
+<div class="modal-content p-3 p-md-4">
+  <h5 class="mb-3">Ajouter un critère d’évaluation</h5>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="row g-3">
+
+    <div class="col-12">
+      <label>Libellé *</label>
+      <input type="text" formControlName="label" class="form-control" required />
+    </div>
+
+    <div class="col-12">
+      <label>Consigne</label>
+      <textarea formControlName="consigne" class="form-control"></textarea>
+    </div>
+
+    <div class="col-md-6">
+      <label>Type de guidance</label>
+      <select class="form-select" formControlName="guidanceType">
+        <option value="Aucune">Aucune</option>
+        <option value="Physique">Physique</option>
+        <option value="Verbale">Verbale</option>
+        <option value="Gestuelle">Gestuelle</option>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label>Réponse attendue</label>
+      <input type="text" formControlName="expectedResponse" class="form-control" />
+    </div>
+
+    <div class="col-md-12">
+      <label>Type de démonstration</label>
+      <select class="form-select" (change)="onVideoTypeChange($event)">
+
+        <option value="url" selected>URL externe (YouTube, etc.)</option>
+        <option value="file">Fichier local</option>
+      </select>
+    </div>
+
+    <div *ngIf="useExternal" class="col-12">
+      <label>URL de démonstration</label>
+      <input type="url" formControlName="demonstrationVideoUrl" class="form-control" />
+    </div>
+
+    <div *ngIf="!useExternal" class="col-12">
+      <label>Vidéo démonstration</label>
+      <input type="file" class="form-control" (change)="onVideoFileSelected($event)" />
+    </div>
+
+    <div class="col-12">
+      <label>Miniature (optionnelle)</label>
+      <input type="file" class="form-control" (change)="onThumbnailSelected($event)" />
+    </div>
+
+    <div class="col-12">
+      <label>Matériels associés</label>
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        <div *ngFor="let mat of materialPhotos" class="form-check">
+          <input type="checkbox" class="form-check-input" [checked]="selectedMaterialIds.includes(mat.id!)"
+                 (change)="toggleMaterialSelection(mat.id!)" />
+          <label class="form-check-label">{{ mat.name }}</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 text-end mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Enregistrer</button>
+      <button type="button" class="btn btn-secondary ms-2" (click)="close()">Annuler</button>
+    </div>
+  </form>
+</div>
