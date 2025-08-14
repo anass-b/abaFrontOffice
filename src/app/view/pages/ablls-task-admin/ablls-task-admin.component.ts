@@ -6,13 +6,13 @@ import { AbllsTask } from '../../../models/ablls-task.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-ablls-task-by-code',
-  standalone: true,
+  selector: 'app-ablls-task-admin.component',
+  standalone:true,
   imports: [CommonModule, RouterLink, FormsModule],
-  templateUrl: './ablls-task-by-code.component.html',
-  styleUrls: []
+  templateUrl: './ablls-task-admin.component.html',
+  styleUrl: './ablls-task-admin.component.scss'
 })
-export class AbllsTaskByCodeComponent implements OnInit {
+export class AbllsTaskAdminComponent implements OnInit {
   abllsTaskService = inject(AbllsTaskService);
   router = inject(Router);
 
@@ -70,30 +70,14 @@ export class AbllsTaskByCodeComponent implements OnInit {
 
     return filtered;
   }
- compareByPrefix = (a: any, b: any): number => {
-  const prefixA = this.domainMap[a.key]?.prefix ?? '';
-  const prefixB = this.domainMap[b.key]?.prefix ?? '';
-  return prefixA.localeCompare(prefixB);
-};
 
-
-
- getFilteredTasks(domainName: string): AbllsTask[] {
-  const term = this.search.toLowerCase();
-  return this.groupedByDomain[domainName]
-    .filter(task =>
+  getFilteredTasks(domainName: string): AbllsTask[] {
+    const term = this.search.toLowerCase();
+    return this.groupedByDomain[domainName].filter(task =>
       task.code?.toLowerCase().includes(term) ||
       task.title?.toLowerCase().includes(term)
-    )
-    .sort((a, b) => this.naturalSort(a.code, b.code));
-}
-naturalSort(a: string = '', b: string = ''): number {
-  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-}
-onAdd(): void {
-    this.router.navigate(['/domaines/new']);
+    );
   }
-
 
   selectDomain(domainName: string): void {
     this.selectedDomainName = domainName;
@@ -106,4 +90,33 @@ onAdd(): void {
   goToDetail(id: number): void {
     this.router.navigate(['/ablls-task', id]);
   }
+  goToAddTask(): void {
+  this.router.navigate(['/ablls/new']);
+}
+goToEditTask(task: AbllsTask): void {
+  this.router.navigate(['/ablls/new'], {
+    state: {
+      updateMode: true,
+      task
+    }
+  });
+}
+
+
+  deleteTask(id: number): void {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+      this.abllsTaskService.deleteTask(id).subscribe({
+        next: () => {
+          // ✅ Mise à jour locale sans recharger toute la liste
+          this.tasks = this.tasks.filter(task => task.id !== id);
+          this.groupByDomainName(this.tasks);
+          console.log('Tâche supprimée avec succès.');
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression :', err);
+        }
+      });
+    }
+  }
+
 }

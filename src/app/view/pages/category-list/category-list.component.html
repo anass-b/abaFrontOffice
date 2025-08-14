@@ -1,0 +1,39 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      class="form-control w-50"
+      placeholder="🔍 Rechercher une catégorie..."
+    />
+    <button class="btn btn-success ms-3" (click)="onAdd()">➕ Ajouter Une Catégorie</button>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4" *ngFor="let category of getFilteredCategories()">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ category.name }}</h5>
+          <p class="card-text text-muted">
+            {{ category.description || '—' }}
+          </p>
+
+          <h6 class="mt-3 text-primary">📚 Domaines :</h6>
+          <ul *ngIf="(category.domains?.length ?? 0 )> 0; else noDomains">
+            <li *ngFor="let domain of category.domains">
+              <strong>{{ domain.prefix }}.</strong> {{ domain.name }}
+            </li>
+          </ul>
+          <ng-template #noDomains>
+            <p class="text-muted fst-italic">Aucun domaine</p>
+          </ng-template>
+
+          <div class="mt-3">
+            <button class="btn btn-sm btn-warning me-2" (click)="onEdit(category.id)">✏️ Modifier</button>
+            <button class="btn btn-sm btn-danger" (click)="onDelete(category.id)">🗑️ Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

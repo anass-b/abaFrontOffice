@@ -53,15 +53,26 @@
     </div>
 
     <div class="col-12">
-      <label>Matériels associés</label>
-      <div class="d-flex flex-wrap gap-2 mt-2">
-        <div *ngFor="let mat of materialPhotos" class="form-check">
-          <input type="checkbox" class="form-check-input" [checked]="selectedMaterialIds.includes(mat.id!)"
-                 (change)="toggleMaterialSelection(mat.id!)" />
-          <label class="form-check-label">{{ mat.name }}</label>
-        </div>
-      </div>
-    </div>
+  <label for="materialSelect">Matériels associés</label>
+  
+  <!-- Select Dropdown -->
+  <select id="materialSelect" class="form-select mt-2"
+          (change)="onMaterialSelected($event)">
+    <option [value]="''" disabled selected>-- Choisir un matériel --</option>
+    <option *ngFor="let mat of materialPhotos" [value]="mat.id" [disabled]="selectedMaterialIds.includes(mat.id!)">
+      {{ mat.name }}
+    </option>
+  </select>
+
+  <!-- Selected Materials as Tags -->
+  <div class="mt-3 d-flex flex-wrap gap-2">
+    <span *ngFor="let id of selectedMaterialIds" class="badge bg-primary d-flex align-items-center">
+      {{ getMaterialName(id) }}
+      <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove" (click)="removeMaterial(id)"></button>
+    </span>
+  </div>
+</div>
+
 
     <div class="col-12 text-end mt-4">
       <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Enregistrer</button>

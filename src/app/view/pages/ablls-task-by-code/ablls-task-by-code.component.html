@@ -1,19 +1,25 @@
 <div class="container py-4">
   <h3 class="mb-3">📑 Tâches ABLLS par domaine</h3>
 
-  <input
-    type="text"
-    [(ngModel)]="search"
-    class="form-control mb-3"
-    placeholder="Rechercher par code ou titre..."
-  />
+  <!-- 🔍 Search + ➕ Bouton -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input
+      type="text"
+      [(ngModel)]="search"
+      class="form-control w-50"
+      placeholder="Rechercher par code ou titre..."
+    />
+    <button class="btn btn-success ms-3" (click)="onAdd()">
+      ➕ Ajouter un Domaine
+    </button>
+  </div>
 
   <!-- Liste des domaines -->
   <div *ngIf="!selectedDomainName">
     <div class="row">
       <div
         class="col-md-4 mb-3"
-        *ngFor="let domain of getFilteredDomains() | keyvalue"
+        *ngFor="let domain of getFilteredDomains() | keyvalue : compareByPrefix"
       >
         <div class="card h-100 shadow-sm text-white bg-success">
           <div class="card-body">
@@ -21,7 +27,7 @@
               class="avatar bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center"
               style="width: 24px; height: 24px; font-weight: bold"
             >
-               {{ domainMap[domain.key]?.prefix ?? '?' }}
+              {{ domainMap[domain.key]?.prefix ?? '?' }}
             </div>
             <h5 class="card-title mt-2">{{ domain.key }}</h5>
             <p class="card-text">{{ domain.value.length }} tâche(s)</p>

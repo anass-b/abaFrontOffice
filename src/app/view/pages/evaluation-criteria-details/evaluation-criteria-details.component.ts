@@ -9,6 +9,8 @@ import { MaterialPhoto } from '../../../models/material-photo.model';
 import { NgIf, NgFor } from '@angular/common';
 import { inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
+
 
 @Component({
   selector: 'app-evaluation-criteria-details',
@@ -20,32 +22,52 @@ import { RouterLink } from '@angular/router';
 export class EvaluationCriteriaDetailsComponent implements OnInit {
   crit!: EvaluationCriteria;
   materials: MaterialPhoto[] = [];
+  indexInTask: number | null = null;
+
   baseUrl = environment.fileBaseUrl;
   critService = inject(EvaluationCriteriaService);
   materialService = inject(MaterialPhotoService);
   sanitizer = inject(DomSanitizer);
   route = inject(ActivatedRoute);
+  taskService = inject(AbllsTaskService);
 
   
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.critService.fetchById(id).subscribe({
-        next: (data) => {
-          this.crit = Array.isArray(data) ? data[0] : data;
-          // Charger les matériels associés
-          if (this.crit?.materialPhotoIds?.length) {
-            this.materialService.fetchAll().subscribe({
-              next: (all) => {
-                this.materials = all.filter(m => this.crit.materialPhotoIds?.includes(m.id!));
-              }
-            });
+  const id = Number(this.route.snapshot.paramMap.get('id'));
+  if (!id) return;
+
+  this.critService.fetchById(id).subscribe({
+    next: (data) => {
+      this.crit = Array.isArray(data) ? data[0] : data;
+
+      // 🧩 Charger les matériels associés
+      if (this.crit?.materialPhotoIds?.length) {
+        this.materialService.fetchAll().subscribe({
+          next: (all) => {
+            this.materials = all.filter(m => this.crit!.materialPhotoIds!.includes(m.id!));
           }
-        }
-      });
-    }
-  }
+        });
+      }
+
+      // 🔢 Calculer l'index du critère dans sa tâche ABLLS
+      if (this.crit?.abllsTaskId) {
+        this.taskService.fetchTaskById(this.crit.abllsTaskId).subscribe({
+          next: (task) => {
+            this.crit.task = task;
+            const criterias = task?.evaluationCriterias || [];
+            const index = criterias.findIndex(c => c.id === this.crit?.id);
+            if (index !== -1) {
+              this.indexInTask = index + 1; // 1-based
+            }
+          }
+        });
+      }
+    },
+    error: (err) => console.error('Erreur chargement critère', err)
+  });
+}
+
 
   getSafeUrl(url: string): SafeResourceUrl {
     const videoId = this.extractYoutubeId(url);

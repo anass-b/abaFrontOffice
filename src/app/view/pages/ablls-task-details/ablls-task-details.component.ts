@@ -16,21 +16,29 @@ import { NgIf, NgFor } from '@angular/common';
 })
 export class AbllsTaskDetailsComponent implements OnInit {
   task: AbllsTask | null = null;
+  selectedCategory: string | null = null;
+  selectedDomain: string | null = null;
+
   baseUrl = environment.fileBaseUrl;
   route = inject(ActivatedRoute);
   taskService = inject(AbllsTaskService);
   sanitizer = inject(DomSanitizer);
 
   
-  ngOnInit(): void {
-    const taskId = Number(this.route.snapshot.paramMap.get('id'));
-    if (taskId) {
-      this.taskService.fetchTaskById(taskId).subscribe({
-        next: (data) => ( console.log(data?.explanationUseExternal , data?.explanationVideoUrl),this.task = data),
-        error: (err) => console.error('Erreur chargement tâche', err)
-      });
-    }
+ ngOnInit(): void {
+  const taskId = Number(this.route.snapshot.paramMap.get('id'));
+  if (taskId) {
+    this.taskService.fetchTaskById(taskId).subscribe({
+      next: (data) => (this.task = data),
+      error: (err) => console.error('Erreur chargement tâche', err)
+    });
   }
+
+  // 👉 Extraire les paramètres pour retour intelligent
+  this.selectedCategory = this.route.snapshot.queryParamMap.get('category');
+  this.selectedDomain = this.route.snapshot.queryParamMap.get('domain');
+}
+
 
   getSafeUrl(url: string): SafeResourceUrl {
   const videoId = this.extractYoutubeId(url);

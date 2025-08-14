@@ -4,22 +4,27 @@
     <h2 class="title">Créez votre compte</h2>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <!-- Nom -->
       <div class="form-group">
         <input type="text" formControlName="lastName" placeholder="Nom" class="form-control" />
       </div>
 
+      <!-- Prénom -->
       <div class="form-group">
         <input type="text" formControlName="firstName" placeholder="Prénom" class="form-control" />
       </div>
 
+      <!-- Email -->
       <div class="form-group">
         <input type="email" formControlName="email" placeholder="Email" class="form-control" />
       </div>
 
+      <!-- Téléphone -->
       <div class="form-group">
         <input type="text" formControlName="phoneNumber" placeholder="Téléphone" class="form-control" />
       </div>
 
+      <!-- Mot de passe -->
       <div class="form-group password-group">
         <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Mot de passe" class="form-control" />
         <button type="button" (click)="togglePassword()" class="toggle-btn">
@@ -27,28 +32,83 @@
         </button>
       </div>
 
+      <!-- Confirmation mot de passe -->
       <div class="form-group password-group">
         <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirmer le mot de passe" class="form-control" />
         <button type="button" (click)="toggleConfirmPassword()" class="toggle-btn">
           {{ showConfirmPassword ? '🙈' : '👁️' }}
         </button>
       </div>
+
+      <!-- Choix profil -->
       <div class="form-group">
-  <app-recaptcha
-  [siteKey]="siteKey"
-  (verified)="onCaptchaResolved($event)">
-</app-recaptcha>
+        <label>Vous êtes :</label>
+        <div>
+          <label class="m-3"><input type="radio" formControlName="profileType" value="parent" /> Parent</label>
+          <label><input type="radio" formControlName="profileType" value="pro" /> Professionnel(le)</label>
+        </div>
+      </div>
 
-</div>
+      <!-- SECTION PARENT -->
+      <div *ngIf="registerForm.value.profileType === 'parent'" [formGroup]="parentInfoGroup">
+        <div class="form-group">
+          <label for="nombreEnfants">Nombre d’enfants à charge</label>
+          <input type="number" formControlName="nombreEnfants" placeholder="Nombre d'enfants à charge" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label for="nombreEnfantsDiagnostiques">Dont avec un diagnostic</label>
+          <input type="number" formControlName="nombreEnfantsDiagnostiques" placeholder="Nombre d'enfants avec diagnostic" class="form-control" />
+        </div>
 
+        <div class="form-group" formArrayName="children">
+          <h4>Enfants concernés</h4>
+          <div *ngFor="let child of childrenFormArray.controls; let i = index" [formGroupName]="i" class="child-card">
+            <label for="child-age-{{ i }}">Âge de l'enfant</label>
+            <input type="number" formControlName="age" placeholder="Âge de l'enfant" class="form-control" />
+            <label for="child-diagnostics-{{ i }}">Diagnostic(s)</label>
+            <input type="text" formControlName="diagnostics" placeholder="Diagnostics (ex: TSA,TDAH)" class="form-control" />
+            <button type="button" class="btn btn-sm btn-danger mt-3" (click)="removeChild(i)">🗑 Supprimer</button>
+          </div>
+          <button type="button" class="btn btn-outline-primary mt-2" (click)="addChild()">➕ Ajouter un enfant</button>
+        </div>
+      </div>
+
+      <!-- SECTION PRO -->
+      <div *ngIf="registerForm.value.profileType === 'pro'" [formGroup]="professionalInfoGroup">
+        <div class="form-group">
+          <label for="statuts">Statut(s) professionnel(s)</label>
+          <input type="text" formControlName="statuts" placeholder="Statuts (ex: Orthophoniste,AVS)" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label for="structure">Structure ou Association</label>
+          <input type="text" formControlName="structure" placeholder="Structure / Association" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label for="fonction">Fonction principale</label>
+          <input type="text" formControlName="fonction" placeholder="Fonction principale" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label for="nbEnfantsTsa">Nombre d’enfants TSA suivis</label>
+          <input type="number" formControlName="nbEnfantsTsa" placeholder="Nombre d'enfants TSA suivis" class="form-control" />
+        </div>
+      </div>
+
+      <!-- reCAPTCHA -->
+      <div class="form-group">
+        <app-recaptcha [siteKey]="siteKey" (verified)="onCaptchaResolved($event)"></app-recaptcha>
+      </div>
+
+      <!-- Bouton submit -->
       <button type="submit" [disabled]="loading || registerForm.invalid || !captchaPassed" class="submit-btn">
         S'inscrire
       </button>
 
+      <!-- Erreur -->
       <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
 
+      <!-- Lien login -->
       <p class="bottom-text">
         Déjà un compte ? <a [routerLink]="['/login']">Connectez-vous ici</a>
       </p>

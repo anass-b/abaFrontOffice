@@ -45,19 +45,25 @@
       ></ng-select>
     </div>
 
-    <!-- Fichier -->
+    <!-- URL du document (externe) -->
     <div class="mb-3">
-      <label for="file" class="form-label">Fichier</label>
+      <label for="url" class="form-label">URL du document *</label>
       <input
-        id="file"
-        type="file"
+        id="url"
+        type="url"
         class="form-control"
-        (change)="onFileSelected($event)"
-        accept=".pdf,.doc,.docx"
+        formControlName="url"
+        placeholder="https://exemple.com/mon-document.pdf"
       />
-      <small *ngIf="fileName" class="text-muted mt-1 d-block">
-        📎 Fichier sélectionné : {{ fileName }}
+      <small class="text-muted d-block mt-1">
+        Le document sera référencé par lien externe (pas d’upload).
       </small>
+      <div
+        class="text-danger small mt-1"
+        *ngIf="documentForm.get('url')?.invalid && documentForm.get('url')?.touched"
+      >
+        Saisissez une URL valide commençant par http(s)://
+      </div>
     </div>
 
     <!-- Premium -->

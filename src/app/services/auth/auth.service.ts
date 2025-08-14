@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Subscription } from '../../models/subscription.model';
 
 @Injectable({ providedIn: 'root' })
-export class AuthService implements OnInit {
+export class AuthService {
   http = inject(HttpClient);
   router = inject(Router);
   jwtHelper = inject(JwtHelperService);
@@ -24,7 +24,8 @@ export class AuthService implements OnInit {
   refreshInProgress = false;
   userSubscription: Subscription | null = null;
 
-  private isAdminSubject = new BehaviorSubject<boolean>(this.computeIsAdmin());
+  private isAdminSubject = new BehaviorSubject<boolean>(false);
+
   isAdmin$ = this.isAdminSubject.asObservable();
 
   public currentUser: AuthUser = {};
@@ -43,6 +44,14 @@ export class AuthService implements OnInit {
     const decoded = this.jwtHelper.decodeToken(token);
     return decoded?.isadmin === true || decoded?.isadmin === 'true';
   }
+  public initializeFromStorage(): void {
+  const storedUser = localStorage.getItem(this.sharedService.CURRENT_USER_KEY);
+  if (storedUser) {
+    this.currentUser = JSON.parse(storedUser);
+    this.updateCurrentUser(this.currentUser); 
+  }
+}
+
 
   public updateCurrentUser(authData: AuthUser) {
   this.currentUser = authData;

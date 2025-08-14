@@ -1,5 +1,19 @@
 <div class="container py-4">
-  <h3 class="mb-4">📚 Contenus de ligne de base</h3>
+  <h3 class="mb-4 text-center">📚 Contenus de ligne de base</h3>
+
+  <!-- Barre de recherche + bouton ajout -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input
+      type="text"
+      [(ngModel)]="search"
+      class="form-control w-50"
+      placeholder="🔍 Rechercher par tâche, critère ou contenu..."
+    />
+    <button class="btn btn-success ms-3" (click)="onAdd()">
+      ➕ Ajouter un contenu
+    </button>
+  </div>
+
   <table class="table table-bordered table-hover">
     <thead class="table-light">
       <tr>
@@ -12,11 +26,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let item of baselineContents">
+      <tr *ngFor="let item of getFilteredBaselineContents()">
         <td>{{ item.id }}</td>
         <td>{{ item.abllsTaskId }}</td>
         <td>{{ item.criteriaId }}</td>
-        <td>{{ item.contentHtml ? (item.contentHtml | slice:0:50) + '...' : '—' }}</td>
+        <td>{{ item.contentHtml ? (item.contentHtml | slice: 0:50) + '...' : '—' }}</td>
         <td>
           <a *ngIf="item.fileUrl" [href]="item.fileUrl" target="_blank" class="btn btn-sm btn-outline-primary">
             📎 Voir

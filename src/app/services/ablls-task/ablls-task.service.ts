@@ -40,13 +40,15 @@ export class AbllsTaskService extends SharedService {
   }
 
   // 🔄 Mise à jour d’une tâche (structure simple JSON, sans fichiers)
-  updateTask(task: AbllsTask): Observable<AbllsTask | null> {
-    if (!task.id) return of(null);
-    return this.auth.checkAuthentication().pipe(
-      switchMap(auth => auth ? this.http.put<AbllsTask>(`${this.apiUrl}/${task.id}`, task) : of(null)),
-      catchError(() => of(null))
-    );
-  }
+ updateTask(id: number, formData: FormData): Observable<AbllsTask | null> {
+  return this.auth.checkAuthentication().pipe(
+    switchMap(auth =>
+      auth ? this.http.put<AbllsTask>(`${this.apiUrl}/${id}`, formData) : of(null)
+    ),
+    catchError(() => of(null))
+  );
+}
+
 
   // ❌ Suppression
   deleteTask(id: number): Observable<void> {

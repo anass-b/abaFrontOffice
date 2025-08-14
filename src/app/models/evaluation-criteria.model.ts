@@ -1,3 +1,4 @@
+import { AbllsTask } from "./ablls-task.model";
 export interface EvaluationCriteria {
   id?: number;
   abllsTaskId?: number;
@@ -5,6 +6,8 @@ export interface EvaluationCriteria {
   consigne?: string;
   expectedResponse?: string;
   guidanceType?: string;
+  task?: AbllsTask | null;
+
 
   useExternalDemonstrationVideo?: boolean;
   demonstrationVideoUrl?: string;

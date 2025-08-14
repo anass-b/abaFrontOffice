@@ -1,0 +1,60 @@
+<div class="container py-4">
+  <h3 class="mb-4">📋 Liste des tâches ABLLS (Admin)</h3>
+
+  <div class="mb-3 d-flex align-items-center justify-content-between">
+    <!-- 🔍 Barre de recherche -->
+    <input
+      type="text"
+      [(ngModel)]="search"
+      class="form-control w-50"
+      placeholder="🔍 Rechercher par code, titre ou domaine..."
+    />
+
+    <!-- ➕ Bouton Ajouter une tâche -->
+    <button class="btn btn-success ms-3" (click)="goToAddTask()">
+      ➕ Ajouter une tâche
+    </button>
+  </div>
+
+  <!-- 🔁 Boucle des domaines -->
+  <div *ngFor="let domain of getFilteredDomains() | keyvalue">
+    <h5 class="text-primary mt-4">{{ domain.key }}</h5>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 10%">Code</th>
+            <th>Titre</th>
+            <th style="width: 20%">Domaine</th>
+            <th class="text-center" style="width: 15%">Critères</th>
+            <th class="text-center" style="width: 15%">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let task of getFilteredTasks(domain.key)">
+            <td><strong>{{ task.code }}</strong></td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.domain?.name ?? 'Inconnu' }}</td>
+            <td class="text-center">{{ task.evaluationCriterias?.length ?? 0 }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-info" (click)="goToDetail(task.id!)">
+                🔍 Voir
+              </button>
+              <button class="btn btn-sm btn-outline-secondary ms-1" (click)="goToEditTask(task)">
+  ✏️ Modifier
+</button>
+
+              <button class="btn btn-sm btn-outline-danger ms-1" (click)="deleteTask(task.id!)">
+                🗑 Supprimer
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="getFilteredTasks(domain.key).length === 0">
+            <td colspan="5" class="text-muted text-center">Aucune tâche trouvée</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

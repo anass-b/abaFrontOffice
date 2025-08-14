@@ -26,8 +26,15 @@
 
 
 
-    <label class="form-label">Contenu HTML</label>
-    <textarea class="form-control mb-3" formControlName="contentHtml" rows="4" placeholder="Ex : Consigne ou description..."></textarea>
+    <div class="mb-3">
+  <label class="form-label">Contenu HTML</label>
+  <quill-editor
+    formControlName="contentHtml"
+    [style]="{ height: '300px' }"
+    [placeholder]="'Rédigez ici le contenu HTML ou consigne...'">
+  </quill-editor>
+</div>
+
 
     <label class="form-label">Fichier PDF/Image (facultatif)</label>
     <input type="file" class="form-control mb-4" (change)="onFileChange($event)" />

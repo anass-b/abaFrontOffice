@@ -25,7 +25,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // 🔕 Skip certains endpoints (login, OTP, etc.)
-  if (!token || req.url.includes('auth') || req.url.includes('verificationCode') || req.url.includes('signDocument')) {
+  if (!token || req.url.includes('auth') || req.url.includes('verificationCode') || req.url.includes('user/register')) {
     return next(req);
   }
 

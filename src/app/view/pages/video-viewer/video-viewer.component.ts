@@ -3,11 +3,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { VideoService } from '../../../services/video/video.service';
 import { Video } from '../../../models/video.model';
+import { SafeUrlPipe } from '../../../services/safeUrlPipe';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-video-viewer',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink , SafeUrlPipe],
   templateUrl: './video-viewer.component.html',
   styleUrls: ['./video-viewer.component.scss']
 })
@@ -15,6 +17,8 @@ export class VideoViewerComponent implements OnInit {
   videoService = inject(VideoService);
   route = inject(ActivatedRoute);
   router = inject(Router);
+
+  Url : string | undefined = `${environment.apiUrl}/video/stream/`
 
   video: Video | null = null;
   videoBlobUrl: string | null = null;
@@ -40,6 +44,8 @@ export class VideoViewerComponent implements OnInit {
       }
     });
   }
+
+  
 
   goBack(): void {
     this.router.navigate(['/videos']);

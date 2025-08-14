@@ -26,12 +26,11 @@ export class AddDocumentComponent implements OnInit {
     title: ['', Validators.required],
     description: [''],
     categories: [[], Validators.required],
-    file: [null, Validators.required],
+    url: ['', [Validators.required, Validators.pattern(/^(https?:\/\/)[^\s]+$/i)]],
     isPremium: [false]
   });
 
   uploading = false;
-  fileName = '';
 
   ngOnInit(): void {
     this.categoryService.getAll().subscribe({
@@ -40,32 +39,25 @@ export class AddDocumentComponent implements OnInit {
     });
   }
 
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      this.documentForm.patchValue({ file });
-      this.fileName = file.name;
-    }
-  }
-
   onSubmit(): void {
     if (this.documentForm.invalid) return;
 
     const values = this.documentForm.value;
-
     const formData = new FormData();
+
     formData.append('title', values.title);
     formData.append('description', values.description || '');
     formData.append('isPremium', values.isPremium.toString());
 
+    // ASP.NET Core liera bien une List<string> avec des clés répétées "categories"
     if (values.categories?.length) {
-      values.categories.forEach((cat: string) => formData.append('categories', cat));
+      values.categories.forEach((cat: string, i: number) => {
+        formData.append('categories', cat); // ou `categories[${i}]` si tu préfères indexer
+      });
     }
 
-
-
-    formData.append('file', values.file);
+    // 🔑 BACK attend FileUrl
+    formData.append('fileUrl', values.url);
 
     this.uploading = true;
     this.documentService.addDocument(formData).subscribe({

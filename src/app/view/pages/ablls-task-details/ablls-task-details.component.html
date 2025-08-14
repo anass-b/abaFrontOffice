@@ -1,11 +1,36 @@
+<!-- 🌒 Barre de navigation -->
+<nav class="navbar navbar-expand-lg" style="background-color: #4b2c5e;">
+  <div class="container-fluid px-4 py-2 d-flex justify-content-between align-items-center">
+    <span class="navbar-brand mb-0 h5 text-white">
+      {{ task?.code }}
+    </span>
+    <a
+      class="btn btn-outline-light rounded-pill"
+      [routerLink]="['/taches']"
+      [queryParams]="{
+        category: selectedCategory,
+        domain: selectedDomain
+      }"
+    >
+      ← Retour aux tâches
+    </a>
+  </div>
+</nav>
 
-   
-<a class="btn btn-primary m-3" routerLink="/ablls">Retour aux taches</a>
-    
-
+<!-- 🔽 Contenu principal -->
 <div class="container py-4 text-center" *ngIf="task; else loading">
-    
   <h2 class="mb-4">Tâche {{ task.code }} : {{ task.title }}</h2>
+
+  <!-- Critères -->
+  <div *ngIf="task.evaluationCriterias?.length" class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+    <a
+      *ngFor="let crit of task.evaluationCriterias; let i = index"
+      [routerLink]="['/evaluation-criteria', crit.id]"
+      class="btn btn-primary"
+    >
+      Critère {{ i + 1 }}
+    </a>
+  </div>
 
   <!-- 🎥 Vidéo -->
   <div class="d-flex justify-content-center mb-4">
@@ -31,18 +56,9 @@
     </video>
   </div>
 
-  <!-- 🔘 Critères -->
-  <div *ngIf="task.evaluationCriterias?.length" class="d-flex justify-content-center flex-wrap gap-2 mt-3">
-    <a
-      *ngFor="let crit of task.evaluationCriterias; let i = index"
-      [routerLink]="['/evaluation-criteria', crit.id]"
-      class="btn btn-primary"
-    >
-      Critère {{ i + 1 }}
-    </a>
-  </div>
 </div>
 
+<!-- Chargement -->
 <ng-template #loading>
   <div class="text-center mt-5">
     <div class="spinner-border text-primary" role="status"></div>

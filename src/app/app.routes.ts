@@ -28,6 +28,8 @@ import { AddBaselineContentComponent } from './view/pages/add-baseline-content/a
 import { BaselineContentListComponent } from './view/pages/baseline-list/baseline-content-list.component';
 import { AddDomainComponent } from './view/pages/add-domain/add-domain.component';
 import { AddCategoryComponent} from './view/pages/add-category/add-category.component';
+import { AbllsTaskAdminComponent } from './view/pages/ablls-task-admin/ablls-task-admin.component';
+import { CategoryListComponent } from './view/pages/category-list/category-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
@@ -52,7 +54,7 @@ export const routes: Routes = [
       { path: 'admin' , component:AdminDashboardComponent},
       { path: 'admin/users/create' , component: AdminUserFormComponent},
       { path: 'profile' , component : UserProfileComponent} ,
-      { path: 'domaines' , component:AbllsTaskListComponent},
+      { path: 'taches' , component:AbllsTaskListComponent},
       { path: 'domaines/new' , component : AddDomainComponent },
       { path: 'ablls', component: AbllsTaskByCodeComponent},
       { path: 'ablls/new' , component : AddAbllsTaskComponent},
@@ -62,7 +64,9 @@ export const routes: Routes = [
       { path: 'evaluation-criteria/:id', component: EvaluationCriteriaDetailsComponent },
       { path: 'baseline/new' , component:AddBaselineContentComponent},
       { path: 'baselines' , component : BaselineContentListComponent},
-      { path: 'category/new' , component : AddCategoryComponent}
+      { path: 'categories' , component : CategoryListComponent},
+      { path: 'category/new' , component : AddCategoryComponent},
+      { path:'ablls-admin', component: AbllsTaskAdminComponent},
 
 
     ]

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { QuillModule } from 'ngx-quill';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
@@ -12,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-add-baseline-content',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule , FormsModule],
+  imports: [CommonModule, ReactiveFormsModule , FormsModule , QuillModule],
   templateUrl: './add-baseline-content.component.html',
   styleUrls: []
 })

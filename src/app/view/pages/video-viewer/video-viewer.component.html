@@ -9,15 +9,15 @@
   </p>
 
   <div class="video-wrapper mb-4 text-center">
-    <ng-container *ngIf="video.useExternal">
-      <iframe
-        [src]="video.url"
-        width="800"
-        height="450"
-        frameborder="0"
-        allowfullscreen
-      ></iframe>
-    </ng-container>
+   <ng-container *ngIf="video.useExternal">
+  <iframe
+  *ngIf="video?.id"
+  [src]="('/api/video/player/' + video.id) | safeUrl"
+  style="width:100%;height:80vh;border:0">
+</iframe>
+
+</ng-container>
+
 
     <ng-container *ngIf="!video.useExternal && videoBlobUrl">
       <video

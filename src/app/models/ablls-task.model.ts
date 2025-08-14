@@ -27,6 +27,8 @@ export interface AbllsTask {
   expectedCriteriaCount?: number;
   status?: string;
 
+   observation?: string;
+
 
   baselineContent?: BaselineContent;
   evaluationCriterias?: EvaluationCriteria[];

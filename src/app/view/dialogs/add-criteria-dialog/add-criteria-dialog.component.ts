@@ -61,6 +61,25 @@ export class AddCriteriaDialogComponent implements OnInit {
     demonstrationVideoFile: null
   });
 }
+onMaterialSelected(event: Event): void {
+  const target = event.target as HTMLSelectElement;
+  const materialId = Number(target.value);
+  if (materialId && !this.selectedMaterialIds.includes(materialId)) {
+    this.selectedMaterialIds.push(materialId);
+  }
+}
+
+
+removeMaterial(id: number): void {
+  this.selectedMaterialIds = this.selectedMaterialIds.filter(mid => mid !== id);
+  this.form.patchValue({ materialPhotoIds: this.selectedMaterialIds }); // ✅ important
+}
+
+
+getMaterialName(id: number): string {
+  const material = this.materialPhotos.find(m => m.id === id);
+  return material ? material.name : 'Inconnu';
+}
 onVideoFileSelected(event: Event): void {
   const input = event.target as HTMLInputElement;
   if (input?.files?.length) {
@@ -90,11 +109,15 @@ onThumbnailSelected(event: Event): void {
     this.form.patchValue({ materialPhotoIds: this.selectedMaterialIds });
   }
 
-  save(): void {
-    if (this.form.valid) {
-      this.dialogRef.close(this.form.value);
-    }
+ save(): void {
+  if (this.form.valid) {
+    this.form.patchValue({
+      materialPhotoIds: this.selectedMaterialIds
+    });
+    this.dialogRef.close(this.form.value);
   }
+}
+
 
   close(): void {
     this.dialogRef.close('Cancel');
