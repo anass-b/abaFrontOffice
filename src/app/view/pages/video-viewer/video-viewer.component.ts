@@ -1,51 +1,62 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 import { VideoService } from '../../../services/video/video.service';
 import { Video } from '../../../models/video.model';
-import { SafeUrlPipe } from '../../../services/safeUrlPipe';
 import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-video-viewer',
   standalone: true,
-  imports: [CommonModule, RouterLink , SafeUrlPipe],
+  imports: [CommonModule, RouterLink],
   templateUrl: './video-viewer.component.html',
   styleUrls: ['./video-viewer.component.scss']
 })
-export class VideoViewerComponent implements OnInit {
-  videoService = inject(VideoService);
-  route = inject(ActivatedRoute);
-  router = inject(Router);
-
-  Url : string | undefined = `${environment.apiUrl}/video/stream/`
+export class VideoViewerComponent implements OnInit, OnDestroy {
+  private videoService = inject(VideoService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   video: Video | null = null;
   videoBlobUrl: string | null = null;
+  playerSafeUrl: SafeResourceUrl | null = null;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.videoService.fetchVideoById(id).subscribe(video => {
-      // Type guard to ensure video is of type Video
-      if (video && typeof (video as Video).useExternal !== 'undefined') {
-        this.video = video as Video;
+    if (!id) {
+      this.goBack();
+      return;
+    }
 
-        if (!this.video.useExternal) {
-            this.videoService.streamVideoById(this.video.id).subscribe(blob => {
-            if (blob) {
-              this.videoBlobUrl = URL.createObjectURL(blob);
-            } else {
-              this.videoBlobUrl = null;
-            }
-          });
-        }
-      } else {
+    this.videoService.fetchVideoById(id).subscribe(video => {
+      // Make sure we got a proper Video
+      if (!video || typeof (video as Video).useExternal === 'undefined') {
         this.video = null;
+        return;
+      }
+
+      this.video = video as Video;
+
+      if (this.video.useExternal) {
+        // Build absolute backend player URL (e.g., http://host:5000/api/video/player/1)
+        const base = environment.apiUrl.replace(/\/+$/, ''); // trim trailing slash
+        const url = `${base}/video/player/${id}`;
+        this.playerSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      } else {
+        // Local/proxy blob playback
+        this.videoService.streamVideoById(this.video.id).subscribe(blob => {
+          if (blob) this.videoBlobUrl = URL.createObjectURL(blob);
+        });
       }
     });
   }
 
-  
+  ngOnDestroy(): void {
+    if (this.videoBlobUrl) URL.revokeObjectURL(this.videoBlobUrl);
+  }
 
   goBack(): void {
     this.router.navigate(['/videos']);

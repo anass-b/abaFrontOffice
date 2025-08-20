@@ -12,6 +12,9 @@
         class="form-control"
         placeholder="Ex: Principes fondamentaux de l’ABA"
       />
+      <div class="text-danger small mt-1" *ngIf="videoForm.get('title')?.touched && videoForm.get('title')?.invalid">
+        Le titre est requis.
+      </div>
     </div>
 
     <!-- Description -->
@@ -20,15 +23,15 @@
       <textarea id="description" formControlName="description" class="form-control" rows="3"></textarea>
     </div>
 
-    <!-- Categories -->
+    <!-- Resource Categories (IDs) -->
     <div class="mb-3">
-      <label for="category" class="form-label">Catégorie(s)</label>
+      <label class="form-label">Catégorie(s)</label>
       <ng-select
         [items]="allCategories"
         bindLabel="name"
-        bindValue="name"
+        bindValue="id"
         [multiple]="true"
-        formControlName="categories"
+        formControlName="categoryIds"
         placeholder="Choisir les catégories"
       ></ng-select>
     </div>
@@ -36,7 +39,7 @@
     <!-- Duration -->
     <div class="mb-3">
       <label for="duration" class="form-label">Durée (en minutes)</label>
-      <input id="duration" type="number" formControlName="duration" class="form-control" />
+      <input id="duration" type="number" formControlName="duration" class="form-control" min="0" />
     </div>
 
     <!-- URL ONLY -->
@@ -49,7 +52,7 @@
         class="form-control"
         placeholder="https://youtube.com/... ou https://vimeo.com/..."
       />
-      <div class="text-danger small mt-1" *ngIf="videoForm.get('url')?.invalid && videoForm.get('url')?.touched">
+      <div class="text-danger small mt-1" *ngIf="videoForm.get('url')?.touched && videoForm.get('url')?.invalid">
         Saisissez une URL valide commençant par http(s)://
       </div>
       <small class="text-muted d-block mt-1">La vidéo sera lue depuis cette URL (pas d’upload).</small>
@@ -82,8 +85,8 @@
 
     <!-- Actions -->
     <div class="mt-4 d-flex gap-3 justify-content-end">
-      <button type="submit" class="btn btn-primary" [disabled]="uploading || videoForm.invalid">
-        {{ uploading ? 'Envoi en cours...' : ' Enregistrer' }}
+      <button type="submit" class="btn btn-primary" [disabled]="submitting || videoForm.invalid">
+        {{ submitting ? 'Envoi en cours...' : 'Enregistrer' }}
       </button>
       <button type="button" class="btn btn-outline-secondary" (click)="router.navigateByUrl('/videos')">
         Annuler

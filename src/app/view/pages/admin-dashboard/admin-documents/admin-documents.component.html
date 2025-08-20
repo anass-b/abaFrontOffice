@@ -1,6 +1,6 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container py-4 d-flex justify-content-between align-items-center mb-3">
   <h4 class="mb-0">📄 Gestion des documents</h4>
-  <a class="btn btn-success" routerLink="/documents/new">
+  <a class="btn btn-success" routerLink="/admin/documents/new">
     <i class="bi bi-file-earmark-plus-fill me-1"></i> Ajouter un document
   </a>
 </div>
@@ -36,9 +36,11 @@
           <a [routerLink]="['/documents', doc.id, 'view']" class="btn btn-sm btn-outline-primary me-1" title="Voir">
             <i class="bi bi-eye-fill"></i>
           </a>
-          <a [routerLink]="['/documents/edit', doc.id]" class="btn btn-sm btn-outline-warning me-1" title="Modifier">
-            <i class="bi bi-pencil-fill"></i>
-          </a>
+          <button class="btn btn-sm btn-outline-warning me-1" title="Modifier"
+        (click)="goToEditDocument(doc)">
+  <i class="bi bi-pencil-fill"></i>
+</button>
+
           <button (click)="deleteDocument(doc.id)" class="btn btn-sm btn-outline-danger" title="Supprimer">
             <i class="bi bi-trash-fill"></i>
           </button>

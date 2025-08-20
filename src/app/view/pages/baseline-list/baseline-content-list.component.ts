@@ -38,8 +38,13 @@ export class BaselineContentListComponent implements OnInit {
   }
 
   onAdd(): void {
-    this.router.navigate(['/baseline/new']);
+    this.router.navigate(['/admin/baseline/new']);
   }
+  viewBaseline(id: number | undefined): void {
+  if (!id) return;
+  this.router.navigate(['/baseline/view', id]);
+}
+
 
   editBaseline(id: number | undefined): void {
     this.router.navigate(['/ablls/edit-baseline', id]);

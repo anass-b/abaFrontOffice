@@ -91,10 +91,10 @@ export class AbllsTaskAdminComponent implements OnInit {
     this.router.navigate(['/ablls-task', id]);
   }
   goToAddTask(): void {
-  this.router.navigate(['/ablls/new']);
+  this.router.navigate(['/admin/ablls/new']);
 }
 goToEditTask(task: AbllsTask): void {
-  this.router.navigate(['/ablls/new'], {
+  this.router.navigate(['/admin/ablls/new'], {
     state: {
       updateMode: true,
       task

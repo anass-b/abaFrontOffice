@@ -1,0 +1,150 @@
+/* ===== Kenane.IO Topbar skin (no markup changes) ===== */
+:host{
+  --bg:#0b132b;
+  --bg-2:#1c2541;
+  --primary:#3a86ff;
+  --primary-2:#00d4ff;
+  --surface:#ffffff;
+  --text:#0b132b;
+  --shadow: 0 10px 20px rgba(2, 7, 62, .06), 0 2px 6px rgba(2,7,62,.05);
+}
+
+/* Navbar wrapper -> gradient topbar */
+.navbar-dark-theme {
+  background: linear-gradient(100deg, var(--bg) 0%, var(--bg-2) 60%, #2d3561 100%);
+  color: #fff;
+  padding: 14px 24px;
+  border-bottom: none;              /* clean topbar edge */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Constrain width like the template */
+.navbar-dark-theme .container-fluid {
+  max-width: 1200px;
+}
+
+/* Brand -> logo badge + text (like "K  Kenane.IO") */
+.navbar-dark-theme .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  color: #fff;
+  text-decoration: none;
+}
+.navbar-dark-theme .brand::before {
+  content: "K";                     /* change if you want another letter */
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+}
+
+/* Links -> pill chips on gradient */
+.navbar-dark-theme .nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 14px;
+}
+.navbar-dark-theme .nav-links li { display: inline-block; }
+
+.navbar-dark-theme .nav-links a,
+.navbar-dark-theme .dropdown > .dropdown-toggle {
+  color: #e6f2ff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,.08);
+  transition: all .2s ease;
+}
+
+.navbar-dark-theme .nav-links a:hover,
+.navbar-dark-theme .dropdown > .dropdown-toggle:hover {
+  background: rgba(255,255,255,.14);
+  color: #ffffff;
+}
+
+.navbar-dark-theme .nav-links a.active,
+.navbar-dark-theme .dropdown > .dropdown-toggle.show {
+  background: #fff;
+  color: var(--bg);
+  font-weight: 700;
+}
+
+/* User button (right side) */
+.btn-user {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #e6f2ff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: .2s;
+}
+.btn-user:hover {
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.26);
+  color: #ffffff;
+}
+
+/* Dropdown menu (kept dark, polished) */
+.custom-dropdown,
+.navbar-dark-theme .dropdown-menu {
+  background: #0f172a;
+  border: 1px solid #1f2a44;
+  border-radius: 12px;
+  min-width: 180px;
+  padding: 6px 0;
+}
+.navbar-dark-theme .dropdown-item {
+  color: #e5e7eb;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+.navbar-dark-theme .dropdown-item:hover,
+.navbar-dark-theme .dropdown-item:focus {
+  background: #17213a;
+  color: #22d3ee;
+}
+
+/* Optional searchbar in the navbar (if you add one inside .container-fluid) */
+.navbar-dark-theme .searchbar {
+  position: relative;
+  max-width: 520px;
+  flex: 1 1 auto;
+}
+.navbar-dark-theme .searchbar input {
+  width: 100%;
+  padding: 12px 44px;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  outline: none;
+}
+.navbar-dark-theme .searchbar .icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .6;
+}
+
+/* Layout helpers on the container line */
+.navbar-dark-theme .container-fluid.d-flex {
+  gap: 20px;
+}

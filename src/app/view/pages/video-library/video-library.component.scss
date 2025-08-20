@@ -1,50 +1,341 @@
-.video-library {
-  .categories {
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    ul {
-      padding-left: 0;
-      li {
-        cursor: pointer;
-        padding: 5px 0;
-        border-left: 3px solid transparent;
-        padding-left: 10px;
-        &.active {
-          font-weight: bold;
-          border-color: #00bfa6;
-          color: #00bfa6;
-        }
-      }
-    }
+/* ===============================
+   Kenane.IO skin for your library
+   (structure & logic untouched)
+   =============================== */
+
+/* Palette & tokens (from Kenane.IO) */
+:host {
+  --bg: #0b132b;
+  --bg-2: #1c2541;
+  --primary: #3a86ff;
+  --primary-2: #00d4ff;
+  --accent: #22c55e;
+
+  --surface: #ffffff;
+  --text: #0b132b;
+  --muted: #667085;
+  --chip: #eef2ff;
+
+  --radius: 18px;
+  --shadow: 0 10px 20px rgba(2, 7, 62, .06), 0 2px 6px rgba(2,7,62,.05);
+}
+
+/* Page container */
+.video-lib {
+  color: var(--text);
+  background: #f6f7fb;
+}
+
+/* Title area */
+h2.m-0.text-black {
+  color: var(--text) !important;
+  font-weight: 800;
+  letter-spacing: .3px;
+}
+
+/* Search (pill input like template) */
+.search.input-group {
+  position: relative;
+  max-width: 520px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border: 1px solid #e6e8f2;
+
+  .input-group-text {
+    background: transparent;
+    border: none;
+    padding-left: 14px;
+    opacity: .7;
   }
 
-  .video-card {
-    overflow: hidden;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    transition: transform 0.2s;
-    &:hover {
-      transform: translateY(-5px);
-    }
-
-    .video-thumbnail {
-      background-size: cover;
-      background-position: center;
-      height: 160px;
-      position: relative;
-    }
-
-    .premium-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: #ff5f5f;
-      color: white;
-      font-size: 0.7rem;
-      padding: 0.3rem 0.5rem;
-      border-radius: 5px;
-      font-weight: bold;
-    }
+  input.form-control {
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 12px 16px;
   }
 }
 
+/* Create button (gradient primary) */
+.btn-create {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 10px 16px !important;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+/* Filter bar panel */
+.filterbar.card {
+  background: var(--surface) !important;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: none !important;
+  padding: 16px !important;
+}
+
+/* Chips (categories) */
+.chip {
+  border-radius: 999px;
+  background: #f1f5f9;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.chip:hover { transform: translateY(-1px); }
+.chip.active {
+  background: linear-gradient(135deg, #dbeafe, #f0f9ff);
+  border-color: #bfdbfe;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Sort pills */
+.pill {
+  border: 1px dashed #cbd5e1;
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.pill.active {
+  background: #0ea5e9;
+  color: #fff;
+  border-style: solid;
+  border-color: #0ea5e9;
+}
+
+/* Grid */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+.vcard { grid-column: span 3; }              /* 4 per row */
+@media (max-width: 1100px) { .vcard { grid-column: span 4; } } /* 3 per row */
+@media (max-width: 700px)  { .vcard { grid-column: span 12; } } /* 1 per row */
+
+/* Card style */
+.vcard.card {
+  background: var(--surface);
+  border-radius: 22px !important;
+  border: none !important;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.vcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(2,7,62,.12);
+}
+
+/* Thumbnail */
+.thumb {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #cbd5e1;
+  overflow: hidden;
+  border-radius: 22px;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform .35s ease;
+}
+.vcard:hover .thumb img { transform: scale(1.04); }
+
+/* Duration badge */
+.duration {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: rgba(0,0,0,.75);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+
+/* Play overlay button (fixed version) */
+.play {
+  all: unset;                              /* reset native button */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62px;
+  height: 62px;
+  transform: translate(-50%, -50%);       /* dead center */
+  border-radius: 999px;
+  background: rgba(11,19,43,.78);
+  box-shadow: 0 6px 16px rgba(2,7,62,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  /* hide the literal "▶" in your HTML without changing markup */
+  font-size: 0;
+  line-height: 0;
+}
+.play::before {
+  content: "";
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  background: rgba(11, 19, 43, .78);
+  box-shadow: 0 6px 16px rgba(2,7,62,.25);
+}
+.play::after {
+  content: "";
+  position: absolute;
+  border-left: 16px solid #fff;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  transform: translateX(3px);
+}
+.vcard:hover .play::before {
+  transform: translateY(-1px);
+  transition: transform .15s ease;
+}
+.play[disabled] {
+  pointer-events: none;
+  opacity: .6;
+}
+
+/* Premium ribbon */
+.ribbon {
+  position: absolute;
+  right: -6px;
+  top: 12px;
+  width: 110px;
+  height: 110px;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ribbon span {
+  position: absolute;
+  width: 160px;
+  padding: 6px 0;
+  transform: rotate(45deg);
+  top: 16px;
+  right: -37px;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Body */
+.card-body {
+  padding: 14px 16px 16px !important;
+}
+.title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+.desc.two-lines {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+
+/* Tags inside cards */
+.chip-mini {
+  font-size: 12px;
+  background: #ecfeff;
+  border: 1px solid #cffafe;
+  color: #0369a1;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+/* Footer actions */
+.card-footer {
+  border: none !important;
+  background: transparent !important;
+  padding: 12px 16px 16px !important;
+}
+
+/* Primary CTA (Lire) */
+.btn-read {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+.btn-read:active { transform: translateY(1px); }
+
+/* Secondary admin actions */
+.btn-edit, .btn-del {
+  border-radius: 14px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+  color: var(--text) !important;
+  padding: 10px 12px !important;
+  font-weight: 600;
+}
+
+/* Empty state */
+.empty {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: none !important;
+}
+.empty .emoji { font-size: 42px; margin-bottom: 6px; }
+
+/* Pagination */
+.pagination .page-link {
+  border-radius: 999px !important;
+  border: 1px solid #e2e8f0;
+  color: var(--text);
+}
+.pagination .page-item.active .page-link {
+  background: #0ea5e9;
+  color: #fff;
+  border-color: #0ea5e9;
+}
+
+/* Inline player */
+.video-player {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.video-player h4 { margin-bottom: 10px; color: var(--text); }
+.video-player video { border-radius: 12px; box-shadow: var(--shadow); }
+
+/* Focus rings */
+:focus-visible {
+  outline: 3px solid rgba(58, 134, 255, .5);
+  outline-offset: 2px;
+}
+
+/* Normalize Bootstrap card radius */
+.card { border-radius: var(--radius); }

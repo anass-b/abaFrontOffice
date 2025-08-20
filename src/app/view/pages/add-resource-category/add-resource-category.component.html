@@ -1,0 +1,24 @@
+<div class="container py-4">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-4 border rounded bg-white shadow-sm">
+    <h3 class="text-center mb-4">Ajouter une catégorie (Ressources)</h3>
+
+    <div class="mb-3">
+      <label class="form-label">Nom de la catégorie *</label>
+      <input class="form-control" formControlName="name" placeholder="Ex : Communication" />
+      <div class="text-danger small mt-1" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">
+        <span *ngIf="form.get('name')?.errors?.['required']">Le nom est requis.</span>
+        <span *ngIf="form.get('name')?.errors?.['nameTaken']">Ce nom est déjà utilisé.</span>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" formControlName="description" rows="3" placeholder="Optionnel"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100" [disabled]="form.invalid || submitting">
+      <span *ngIf="!submitting">Enregistrer</span>
+      <span *ngIf="submitting">Enregistrement…</span>
+    </button>
+  </form>
+</div>

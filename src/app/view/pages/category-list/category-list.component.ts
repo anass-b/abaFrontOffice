@@ -53,8 +53,17 @@ export class CategoryListComponent implements OnInit {
   }
 
   onEdit(id: number) {
-    this.router.navigate(['/categories/edit', id]);
-  }
+  const category = this.categories.find(c => c.id === id);
+  if (!category) return;
+
+  this.router.navigate(['/admin/category/new'], {
+    state: {
+      updateMode: true,
+      category
+    }
+  });
+}
+
 
   onDelete(id: number) {
     if (confirm('Confirmer la suppression de cette catégorie ?')) {
@@ -66,6 +75,6 @@ export class CategoryListComponent implements OnInit {
   }
 
   onAdd() {
-    this.router.navigate(['/category/new']);
+    this.router.navigate(['/admin/category/new']);
   }
 }

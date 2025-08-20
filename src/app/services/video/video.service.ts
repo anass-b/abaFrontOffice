@@ -8,98 +8,71 @@ import { SharedService } from '../shared/shared.service';
 import { AuthService } from '../auth/auth.service';
 import { Video } from '../../models/video.model';
 
-
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class VideoService extends SharedService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  
 
   private readonly apiUrl = environment.apiUrl + '/video';
 
   videosList: Video[] = [];
 
-  // 📥 Ajouter une vidéo (FormData)
-  addVideo(videoForm: FormData): Observable<Video | {}> {
+  // ---------- Create / Update (JSON) ----------
+  addVideo(video: Video): Observable<Video | {}> {
+    // Expected: { title, url, categoryIds, ... }
     return this.authService.checkAuthentication().pipe(
-      switchMap(result => {
-        if (!result) return of({});
-        return this.http.post<Video>(this.apiUrl, videoForm);
-      }),
+      switchMap(ok => ok ? this.http.post<Video>(this.apiUrl, video) : of({})),
       catchError(() => of({}))
     );
   }
 
-  // 🔄 Modifier une vidéo
-  updateVideo(id: number, videoForm: FormData): Observable<Video | {}> {
+  updateVideo(video: Video): Observable<Video | {}> {
     return this.authService.checkAuthentication().pipe(
-      switchMap(result => {
-        if (!result) return of({});
-        return this.http.put<Video>(`${this.apiUrl}/${id}`, videoForm);
-      }),
+      switchMap(ok => ok ? this.http.put<Video>(`${this.apiUrl}/${video.id}`, video) : of({})),
       catchError(() => of({}))
     );
   }
 
-  // 📃 Obtenir toutes les vidéos
+  // ---------- Read ----------
   fetchVideos(): Observable<Video[]> {
     return this.authService.checkAuthentication().pipe(
-      switchMap(result => {
-        if (!result) return of([]);
-        return this.http.get<Video[]>(this.apiUrl);
-      }),
+      switchMap(ok => ok ? this.http.get<Video[]>(this.apiUrl) : of([])),
       catchError(() => of([]))
     );
   }
 
-  // 🔍 Obtenir une vidéo par ID
   fetchVideoById(id: number): Observable<Video | {}> {
     return this.authService.checkAuthentication().pipe(
-      switchMap(result => {
-        if (!result) return of({});
-        return this.http.get<Video>(`${this.apiUrl}/${id}`);
-      }),
+      switchMap(ok => ok ? this.http.get<Video>(`${this.apiUrl}/${id}`) : of({})),
       catchError(() => of({}))
     );
   }
 
-  // ❌ Supprimer une vidéo
+  // ---------- Delete ----------
   deleteVideo(id: number | undefined): Observable<void> {
     return this.authService.checkAuthentication().pipe(
-      switchMap(result => {
-        if (!result) return of();
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
-      }),
-      catchError(() => of())
+      switchMap(ok => ok ? this.http.delete<void>(`${this.apiUrl}/${id}`) : of(void 0)),
+      catchError(() => of(void 0))
     );
   }
-  // 📺 Stream vidéo sécurisée
-streamVideoById(id: number | undefined): Observable<Blob | null> {
-  return this.authService.checkAuthentication().pipe(
-    switchMap(result => {
-      if (!result) return of(null);
 
-      return this.http.get(`${this.apiUrl}/stream/${id}`, {
-        responseType: 'blob'  // 👈 IMPORTANT pour la vidéo
-      });
-    }),
-    catchError(() => of(null))
-  );
-}
+  // ---------- Streaming proxy (blob) ----------
+  streamVideoById(id: number | undefined): Observable<Blob | null> {
+    return this.authService.checkAuthentication().pipe(
+      switchMap(ok => ok
+        ? this.http.get(`${this.apiUrl}/stream/${id}`, { responseType: 'blob' })
+        : of(null)),
+      catchError(() => of(null))
+    );
+  }
 
-
-  // 🔍 Rechercher une vidéo
+  // ---------- (Optional) Search ----------
+  // NOTE: your backend doesn't expose /api/video/search yet.
   searchVideos(searchTerm: string): Observable<Video[]> {
     return this.authService.checkAuthentication().pipe(
-      switchMap(result => {
-        if (!result) return of([]);
-        return this.http.get<Video[]>(`${this.apiUrl}/search`, {
-          params: { q: searchTerm }
-        });
-      }),
+      switchMap(ok => ok
+        ? this.http.get<Video[]>(`${this.apiUrl}/search`, { params: { q: searchTerm } })
+        : of([])),
       catchError(() => of([]))
     );
   }

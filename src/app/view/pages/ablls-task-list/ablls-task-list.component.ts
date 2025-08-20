@@ -1,13 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
-import { AbllsTask } from '../../../models/ablls-task.model';
 import { FormsModule } from '@angular/forms';
+import { AbllsTaskService } from '../../../services/ablls-task/ablls-task.service';
 import { AuthService } from '../../../services/auth/auth.service';
 import { CategoryService } from '../../../services/category/category.service';
+import { DomainService } from '../../../services/domain/domain.service';
+import { AbllsTask } from '../../../models/ablls-task.model';
+import { Category } from '../../../models/category.model';
 import { Domain } from '../../../models/domain.model';
-import { ActivatedRoute } from '@angular/router';
+import { AbllsTaskEnriched } from '../../../models/ablls-task.model';
+type MatchKind = 'code' | 'title' | 'domain' | 'category' | 'mixed' | null;
 
 @Component({
   selector: 'app-ablls-task-list',
@@ -17,381 +20,193 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./ablls-task-list.component.scss']
 })
 export class AbllsTaskListComponent implements OnInit {
-  abllsTaskService = inject(AbllsTaskService);
-  router = inject(Router);
-  auth = inject(AuthService);
-  categoryService = inject(CategoryService);
-  route = inject(ActivatedRoute);
+  // services
+  private abllsTaskService = inject(AbllsTaskService);
+  private router = inject(Router);
+  public auth = inject(AuthService);
+  private categoryService = inject(CategoryService);
+  private domainService = inject(DomainService);
 
+  // data
+ tasks: AbllsTaskEnriched[] = [];
+  filteredTasks: AbllsTaskEnriched[] = [];
+  categories: Category[] = [];
+  domains: Domain[] = [];
 
-  tasks: AbllsTask[] = [];
-  matchedBy: 'code' | 'title' | 'domain' | 'category' | null = null;
-
-  groupedByCategory: { [categoryName: string]: { [domainName: string]: AbllsTask[] } } = {};
+  // maps
   categoryMap: { [id: number]: string } = {};
-  domainMap: { [domainName: string]: Domain } = {};
+  domainMapById: { [id: number]: Domain } = {};
+  domainMapByName: { [name: string]: Domain } = {};
+
+  // ui
   search = '';
-  selectedCategory: string | null = null;
-  selectedDomain: string | null = null;
+  matchedBy: MatchKind = null;
   isReady = false;
 
+  // pagination
+  currentPage = 1;
+  pageSize = 12;
 
- ngOnInit(): void {
-  const queryParams = this.route.snapshot.queryParams;
-  this.selectedCategory = queryParams['category'] ?? null;
-  this.selectedDomain = queryParams['domain'] ?? null;
+  readonly matchedByLabel: Record<Exclude<MatchKind, null>, string> = {
+    code: 'code',
+    title: 'titre',
+    domain: 'domaine',
+    category: 'catégorie',
+    mixed: 'recherche'
+  };
 
-  this.abllsTaskService.fetchTasks().subscribe(async tasks => {
-    this.tasks = tasks;
+  ngOnInit(): void {
+    console.log("🔥 AbllsTaskListComponent initialized");
 
-    const categoryIds = new Set<number>();
-    tasks.forEach(task => {
-      if (task.domain?.categoryId) {
-        categoryIds.add(task.domain.categoryId);
-      }
-    });
+    Promise.all([
+      this.categoryService.getAll().toPromise(),
+      this.domainService.getAll().toPromise(),
+      this.abllsTaskService.fetchTasks().toPromise()
+    ])
+      .then(([cats, doms, tasks]) => {
+        this.categories = cats || [];
+        this.domains = doms || [];
+        this.tasks = tasks || [];
 
-    const idsArray = Array.from(categoryIds);
+        // Build maps
+        this.categories.forEach(cat => (this.categoryMap[cat.id] = cat.name?.trim() || ''));
+        this.domains.forEach(dom => {
+          this.domainMapById[dom.id] = dom;
+          this.domainMapByName[dom.name] = dom;
+        });
 
-    if (idsArray.length === 0) {
-      this.groupTasks(this.tasks);
-      this.isReady = true;
-      return;
-    }
+        // Enrich tasks with resolved ids/names and normalized fields ONCE
+        const norm = (v?: string | null) =>
+          (v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    try {
-      const categoryRequests = idsArray.map(id =>
-        this.categoryService.getById(id).toPromise()
-      );
+   this.tasks = this.tasks.map(t => {
+  const domObj = this.domainMapById[t.domainId] || t.domain;
+  const domainName = domObj?.name?.trim() || '';
+  const categoryName = this.categoryMap[domObj?.categoryId ?? -1] || '';
 
-      const categories = await Promise.all(categoryRequests);
+  const norm = (v?: string) =>
+    (v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-      categories.forEach((cat, index) => {
-        const id = idsArray[index];
-        this.categoryMap[id] = cat?.name ?? 'Catégorie inconnue';
-      });
-
-      this.groupTasks(this.tasks);
-      this.isReady = true;
-    } catch (error) {
-      console.error('Erreur lors du chargement des catégories :', error);
-    }
-  });
-}
+  return {
+    ...t,
+    __domainName: domainName,
+    __categoryName: categoryName,
+    __nCode: norm(t.code),
+    __nTitle: norm(t.title),
+    __nDom: norm(domainName),
+    __nCat: norm(categoryName)
+  } as AbllsTaskEnriched;
+});
 
 
-
-
-  private loadCategories(tasks: AbllsTask[]) {
-    const categoryIds = new Set<number>();
-    tasks.forEach(task => {
-      if (task.domain?.categoryId) {
-        categoryIds.add(task.domain.categoryId);
-      }
-    });
-
-    const idsArray = Array.from(categoryIds);
-    idsArray.forEach(id => {
-      this.categoryService.getById(id).subscribe(cat => {
-        this.categoryMap[id] = cat?.name ?? 'Catégorie inconnue';
-        this.groupTasks(this.tasks); // regroup once we start having names
-      });
-    });
-  }
-  goToAddTask(): void {
-  this.router.navigate(['/ablls/new']);
-}
-//onSearchChange(value: string): void {
-//  console.log('[🔍 onSearchChange] New value:', value);
-//
-//  if (!value) {
-//    console.log('[🧹 onSearchChange] Clearing search');
-//    this.clearCategory();
-//    return;
-//  }
-//
-// this.smartSearch(value); // toujours rechercher
-//
-//}
+// initial list
+this.filteredTasks = this.sortTasks(this.tasks);
+this.isReady = true;
 
 
 
-//smartSearch(term: string): void {
-//  const cleanTerm = term.trim().toLowerCase();
-//  console.log('[🔍 smartSearch] Searching for:', cleanTerm);
-//
-//  let matchedTask: AbllsTask | undefined;
-//
-//  // === Étape 1 : chercher par CODE (startsWith)
-//  matchedTask = this.tasks.find(t =>
-//    t.code?.toLowerCase().startsWith(cleanTerm)
-//  );
-//
-//  if (matchedTask) {
-//    const domain = matchedTask.domain!;
-//    const categoryName = this.categoryMap[domain.categoryId];
-//    console.log(`[✅ MATCH by CODE] Task ${matchedTask.code} in category ${categoryName}, domain ${domain.name}`);
-//
-//    this.selectedCategory = categoryName;
-//    this.selectedDomain = domain.name;
-//    return;
-//  }
-//
-//  // === Étape 2 : chercher par TITLE (includes)
-//  matchedTask = this.tasks.find(t =>
-//    t.title?.toLowerCase().includes(cleanTerm)
-//  );
-//
-//  if (matchedTask) {
-//    const domain = matchedTask.domain!;
-//    const categoryName = this.categoryMap[domain.categoryId];
-//    console.log(`[✅ MATCH by TITLE] Task ${matchedTask.code} in category ${categoryName}, domain ${domain.name}`);
-//
-//    this.selectedCategory = categoryName;
-//    this.selectedDomain = domain.name;
-//    return;
-//  }
-//
-//  // === Étape 3 : chercher par domaine
-//  for (const [catName, domains] of Object.entries(this.groupedByCategory)) {
-//    for (const domainName of Object.keys(domains)) {
-//      if (domainName.toLowerCase().includes(cleanTerm)) {
-//        console.log(`[✅ MATCH by DOMAIN] → ${domainName}`);
-//        this.selectedCategory = catName;
-//        this.selectedDomain = domainName;
-//        return;
-//      }
-//    }
-//  }
-//
-//  // === Étape 4 : chercher par catégorie
-//  for (const catName of Object.keys(this.groupedByCategory)) {
-//    if (catName.toLowerCase().includes(cleanTerm)) {
-//      console.log(`[✅ MATCH by CATEGORY] → ${catName}`);
-//      this.selectedCategory = catName;
-//      this.selectedDomain = null;
-//      return;
-//    }
-//  }
-//
-//  console.warn('[❌ smartSearch] No match found for:', cleanTerm);
-//}
-//
-//
-//
+        // initial list
+        this.filteredTasks = this.sortTasks(this.tasks);
+        this.isReady = true;
 
-smartSearch(term: string): void {
-  const cleanTerm = term.trim().toLowerCase();
-  let matchedTask: AbllsTask | undefined;
-
-  // 1) CODE
-  matchedTask = this.tasks.find(t => t.code?.toLowerCase().startsWith(cleanTerm));
-  if (matchedTask) {
-    const d = matchedTask.domain!;
-    const categoryName = this.categoryMap[d.categoryId];
-    this.selectedCategory = categoryName;
-    this.selectedDomain   = d.name;
-    this.matchedBy = 'code';      
-    return;
+        // Uncomment for debugging
+        console.log(this.tasks.slice(0,5).map((t:any)=>({code:t.code, dom:t.__domainName, cat:t.__categoryName, id:t.__resolvedDomainId})));
+      })
+      .catch(err => console.error('Erreur chargement données', err));
   }
 
-  // 2) TITLE
-  matchedTask = this.tasks.find(t => t.title?.toLowerCase().includes(cleanTerm));
-  if (matchedTask) {
-    const d = matchedTask.domain!;
-    const categoryName = this.categoryMap[d.categoryId];
-    this.selectedCategory = categoryName;
-    this.selectedDomain   = d.name;
-    this.matchedBy = 'title';     
-    return;
+  /** Navigation */
+  goToAddTask(): void { this.router.navigate(['/admin/ablls/new']); }
+  goToDetail(id: number): void { this.router.navigate(['/ablls-task', id]); }
+
+  /** Sort by code (A1, A2, B1...) */
+  private sortTasks(arr: AbllsTask[]): AbllsTask[] {
+    return [...arr].sort((a: any, b: any) =>
+      (a.code || '').localeCompare((b.code || ''), 'fr', { numeric: true })
+    );
   }
 
-  // 3) DOMAIN
-  for (const [catName, domains] of Object.entries(this.groupedByCategory)) {
-    for (const domainName of Object.keys(domains)) {
-      if (domainName.toLowerCase().includes(cleanTerm)) {
-        this.selectedCategory = catName;
-        this.selectedDomain   = domainName;
-        this.matchedBy = 'domain'; 
-        return;
-      }
-    }
-  }
-
-  // 4) CATEGORY
-  for (const catName of Object.keys(this.groupedByCategory)) {
-    if (catName.toLowerCase().includes(cleanTerm)) {
-      this.selectedCategory = catName;
-      this.selectedDomain   = '__ALL__';
-      this.matchedBy = 'category'; 
-      return;
-    }
-  }
-
-  console.warn('[❌ smartSearch] No match found for:', cleanTerm);
-}
-
-
-
-
-  groupTasks(tasks: AbllsTask[]): void {
-    const result: any = {};
-
-    tasks.forEach(task => {
-      const domain = task.domain;
-      const catId = domain?.categoryId;
-      const categoryName = this.categoryMap[catId!] || 'Autre catégorie';
-      const domainName = domain?.name ?? 'Domaine inconnu';
-
-      if (!result[categoryName]) {
-        result[categoryName] = {};
-      }
-      if (!result[categoryName][domainName]) {
-        result[categoryName][domainName] = [];
-      }
-      if (domain?.name) {
-        this.domainMap[domain.name] = domain;
-      }
-
-      result[categoryName][domainName].push(task);
-    });
-
-    this.groupedByCategory = result;
-    console.log('[📦 groupTasks] categoryMap:', this.categoryMap);
-console.log('[📦 groupTasks] groupedByCategory:', this.groupedByCategory);
-
-  }
-
+  /** Search entrypoint */
   onSearchChange(value: string): void {
-  if (!value) {
+    this.search = value || '';
+    this.applySmartFilter();
+  }
+
+  clearSearch(): void {
     this.search = '';
-    this.matchedBy = null;        
-    this.clearCategory();
+    this.matchedBy = null;
+    this.filteredTasks = this.sortTasks(this.tasks);
+    this.currentPage = 1;
+  }
+
+  /** Smart filter using precomputed fields */
+  private applySmartFilter(): void {
+  const q = (this.search || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  console.log('🔍 Query:', q);
+
+  if (!q) {
+    this.finish(null, this.tasks);
     return;
   }
-  this.smartSearch(value);
-}
 
-clearCategory() {
-  this.selectedCategory = null;
-  this.selectedDomain = null;
-  this.matchedBy = null;          
-}
+  const codeMatches     = this.tasks.filter((t:any) => t.__nCode.startsWith(q));
+  const titleMatches    = this.tasks.filter((t:any) => t.__nTitle.includes(q));
+  const domainMatches   = this.tasks.filter((t:any) => t.__nDom.includes(q));
+  const categoryMatches = this.tasks.filter((t:any) => t.__nCat.includes(q));
 
-clearDomain() {
-  this.selectedDomain = null;
-  this.matchedBy = null;          
-}
-
-selectCategory(category: string) {
-  this.selectedCategory = category;
-  this.matchedBy = null;          
-}
-
-selectDomain(domain: string) {
-  this.selectedDomain = domain;
-  this.matchedBy = null;          
-}
-
-
- getFilteredCategories(): string[] {
-  const term = this.search.toLowerCase();
-  return Object.keys(this.groupedByCategory).filter(cat =>
-    cat.toLowerCase().includes(term)
-  );
-}
-
-getFilteredDomains(): string[] {
-  const term = this.search.toLowerCase();
-  return Object.keys(this.groupedByCategory[this.selectedCategory!]).filter(domain =>
-    domain.toLowerCase().includes(term)
-  );
-}
-
-//getFilteredTasks(): AbllsTask[] {
-//  const term = this.search.toLowerCase();
-//  return this.groupedByCategory[this.selectedCategory!][this.selectedDomain!].filter(task =>
-//    task.title?.toLowerCase().includes(term) || task.code?.toLowerCase().includes(term)
-//  );
-//}
-getFilteredTasks(): AbllsTask[] {
-  const term = this.search.toLowerCase();
-
-  // 👉 Cas "recherche par titre" (includes): on remonte TOUTES les tâches matchées,
-  //    pas seulement celles du domaine/catégorie pré-sélectionné par smartSearch.
-  if (this.matchedBy === 'title') {
-    return this.tasks.filter(t =>
-      t.title?.toLowerCase().includes(term) || t.code?.toLowerCase().includes(term)
-    );
-  }
-
-  // 👉 Cas "catégorie" => __ALL__: toutes les tâches de la catégorie (comme avant)
-  if (this.selectedCategory && this.selectedDomain === '__ALL__') {
-    let all: AbllsTask[] = [];
-    const domains = this.groupedByCategory[this.selectedCategory] || {};
-    for (const d of Object.keys(domains)) all = all.concat(domains[d]);
-    if (this.matchedBy === 'category') return all;
-    return all.filter(t =>
-      t.title?.toLowerCase().includes(term) || t.code?.toLowerCase().includes(term)
-    );
-  }
-
-  // 👉 Cas "domaine" normal
-  if (this.selectedCategory && this.selectedDomain) {
-    const list = this.groupedByCategory[this.selectedCategory][this.selectedDomain] || [];
-    if (this.matchedBy === 'domain') return list; // pas de filtre texte
-    return list.filter(t =>
-      t.title?.toLowerCase().includes(term) || t.code?.toLowerCase().includes(term)
-    );
-  }
-
-  return [];
-}
-
-
-
-  getTotalDomainsInCategory(category: string): number {
-  return Object.keys(this.groupedByCategory[category]).length;
-}
-
-
-  getTotalTasksInCategory(category: string): number {
-    return Object.values(this.groupedByCategory[category])
-      .reduce((sum, tasks) => sum + tasks.length, 0);
-  }
-
-  getDomainsForCategory(category: string): string[] {
-    return Object.keys(this.groupedByCategory[category]);
-  }
-
-  getTasksForDomain(category: string, domain: string): AbllsTask[] {
-    return this.groupedByCategory[category][domain];
-  }
-
-  //selectCategory(category: string) {
-  //  this.selectedCategory = category;
-  //}
-//
-  //selectDomain(domain: string) {
-  //  this.selectedDomain = domain;
-  //}
-//
-  //clearCategory() {
-  //  this.selectedCategory = null;
-  //  this.selectedDomain = null;
-  //}
-//
-  //clearDomain() {
-  //  this.selectedDomain = null;
-  //}
-
-  goToDetail(id: number): void {
-  this.router.navigate(['/ablls-task', id], {
-    queryParams: {
-      category: this.selectedCategory,
-      domain: this.selectedDomain
-    }
+  console.log({
+    codeMatches: codeMatches.map((t:any)=>t.code),
+    titleMatches: titleMatches.map((t:any)=>t.code),
+    domainMatches: domainMatches.map((t:any)=>`${t.code} (${t.__domainName})`),
+    categoryMatches: categoryMatches.map((t:any)=>`${t.code} (${t.__categoryName})`)
   });
+
+  if (codeMatches.length)   return this.finish('code', codeMatches);
+  if (titleMatches.length)  return this.finish('title', titleMatches);
+  if (domainMatches.length) return this.finish('domain', domainMatches);
+  if (categoryMatches.length)return this.finish('category', categoryMatches);
+
+  // fallback
+  const mixed = this.tasks.filter((t:any) =>
+    t.__nCode.includes(q) || t.__nTitle.includes(q) || t.__nDom.includes(q) || t.__nCat.includes(q)
+  );
+  this.finish(mixed.length ? 'mixed' : null, mixed);
 }
 
+
+  private finish(kind: MatchKind, list: AbllsTask[]): void {
+    this.matchedBy = kind;
+    this.filteredTasks = this.sortTasks(list);
+    this.currentPage = 1;
+  }
+
+  onEdit(task: AbllsTask): void {
+    if (!task) return;
+    this.router.navigate(['/admin/ablls/new'], { state: { updateMode: true, task } });
+  }
+
+  onDelete(task: AbllsTask): void {
+    if (!task?.id) return;
+    const label = `${task.code ?? ''} - ${task.title ?? ''}`.trim();
+    if (!confirm(`Confirmer la suppression de : ${label} ?`)) return;
+
+    this.abllsTaskService.deleteTask(task.id).subscribe({
+      next: () => {
+        this.tasks = this.tasks.filter(t => t.id !== task.id);
+        this.applySmartFilter();
+        const pages = this.totalPages;
+        if (this.currentPage > pages) this.currentPage = Math.max(1, pages);
+      },
+      error: () => alert('La suppression a échoué. Réessaie plus tard.')
+    });
+  }
+
+  /** Pagination helpers */
+  get paginatedTasks(): AbllsTask[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTasks.slice(start, start + this.pageSize);
+  }
+  get totalPages(): number {
+    return Math.ceil(this.filteredTasks.length / this.pageSize);
+  }
 }

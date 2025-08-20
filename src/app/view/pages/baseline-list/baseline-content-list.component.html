@@ -43,6 +43,13 @@
           <button class="btn btn-sm btn-danger" (click)="deleteBaseline(item.id)">
             🗑️ Supprimer
           </button>
+          <button
+    class="btn btn-sm btn-outline-primary"
+    (click)="viewBaseline(item.id)"
+    [disabled]="!item?.id"
+  >
+    👁️ Voir
+  </button>
         </td>
       </tr>
     </tbody>

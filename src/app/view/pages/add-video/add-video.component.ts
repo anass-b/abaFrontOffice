@@ -1,13 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { VideoService } from '../../../services/video/video.service';
-import { Category } from '../../../models/category.model';
-import { CategoryService } from '../../../services/category/category.service';
 import { NgSelectModule } from '@ng-select/ng-select';
+
+import { VideoService } from '../../../services/video/video.service';
+import { ResourceCategoryService } from '../../../services/resource-category/resource-category.service';
 import { SharedService } from '../../../services/shared/shared.service';
 
+import { Video } from '../../../models/video.model';
+import { ResourceCategory } from '../../../models/resource-category.model';
 
 @Component({
   selector: 'app-add-video',
@@ -20,71 +22,97 @@ export class AddVideoComponent implements OnInit {
   fb = inject(FormBuilder);
   router = inject(Router);
   videoService = inject(VideoService);
-  categoryService = inject(CategoryService);
+  rcService = inject(ResourceCategoryService);
   sharedService = inject(SharedService);
 
-  allCategories: Category[] = [];
+  allCategories: ResourceCategory[] = [];
+  updateMode = false;
+videoIdToEdit?: number;
+rowVersion?: number;
 
-  // URL-only form (no file upload)
+
+  // JSON form (no file upload)
   videoForm: FormGroup = this.fb.group({
     title: ['', Validators.required],
     description: [''],
-    categories: [[]],
+    categoryIds: [[] as number[]],
     duration: [null],
     isPremium: [false],
-    // useExternal is forced to true at submit
-    url: ['', [Validators.required, Validators.pattern(/^(https?:\/\/)[^\s]+$/i)]],
-    thumbnailUrl: [''] // optional
+    url: ['', [Validators.required, Validators.pattern(/^(https?:\/\/).+/i)]],
+    thumbnailUrl: ['']
   });
 
-  uploading = false;
+  submitting = false;
 
-  ngOnInit() {
-    this.categoryService.getAll().subscribe({
-      next: (cats) => {
-        this.allCategories = cats.map(cat => ({
-          ...cat,
-          name: this.sharedService.fixEncoding(cat.name),
-          description: this.sharedService.fixEncoding(cat.description)
-        }));
-      },
-      error: () => alert('Erreur lors du chargement des catégories')
-    });
-  }
+ ngOnInit() {
+  this.rcService.list().subscribe({
+    next: (cats) => {
+      this.allCategories = (cats || []).map(c => ({
+        ...c,
+        name: this.sharedService.fixEncoding(c.name),
+        description: c.description ? this.sharedService.fixEncoding(c.description) : undefined
+      }));
+
+      // 🔎 Mode édition via history.state
+      const data = history.state;
+      if (data && data.updateMode && data.video) {
+        this.updateMode = true;
+        this.videoIdToEdit = data.video.id;
+        this.rowVersion = data.video.rowVersion;
+        this.populateForm(data.video);
+      }
+    },
+    error: () => alert('Erreur lors du chargement des catégories')
+  });
+}
+populateForm(video: Video): void {
+  this.videoForm.patchValue({
+    title: video.title ?? '',
+    description: video.description ?? '',
+    categoryIds: video.categoryIds ?? [],
+    duration: video.duration ?? null,
+    isPremium: !!video.isPremium,
+    url: video.url ?? '',
+    thumbnailUrl: video.thumbnailUrl ?? ''
+  });
+}
+
 
   onSubmit(): void {
-    if (this.videoForm.invalid) return;
+  if (this.videoForm.invalid || this.submitting) return;
+  this.submitting = true;
 
-    const values = this.videoForm.value;
-    const formData = new FormData();
+  const v = this.videoForm.value;
+  const payload: Video = {
+    id: this.videoIdToEdit,                         // présent en update
+    title: (v.title || '').trim(),
+    description: v.description || undefined,
+    categoryIds: (v.categoryIds as number[]) ?? [],
+    duration: v.duration != null ? Number(v.duration) : undefined,
+    url: (v.url || '').trim(),
+    thumbnailUrl: v.thumbnailUrl || undefined,
+    isPremium: !!v.isPremium,
+    // useExternal sera géré côté serveur si tu le forces à true
+    rowVersion: this.rowVersion                     // si ton back l’utilise
+  };
 
-    formData.append('title', values.title);
-    formData.append('description', values.description || '');
-    if (values.categories?.length) {
-      values.categories.forEach((cat: string) => formData.append('categories', cat));
+  const obs = this.updateMode && this.videoIdToEdit
+    ? this.videoService.updateVideo(payload)        // 🔄 update
+    : this.videoService.addVideo(payload);          // ➕ create
+
+  obs.subscribe({
+    next: () => {
+      this.submitting = false;
+      this.router.navigateByUrl('/admin/videoList');
+    },
+    error: (err) => {
+      this.submitting = false;
+      const msg = (err?.error?.message || '').toString().toLowerCase().includes('host')
+        ? 'URL non autorisée par le serveur (hôte non supporté).'
+        : (this.updateMode ? 'Erreur lors de la mise à jour de la vidéo.' : 'Erreur lors de l’enregistrement de la vidéo.');
+      alert(msg);
     }
-    if (values.duration != null) {
-      formData.append('duration', values.duration.toString());
-    }
+  });
+}
 
-    formData.append('isPremium', values.isPremium.toString());
-    formData.append('useExternal', 'true');     // 🔒 force external mode
-    formData.append('url', values.url);         // 🔑 backend expects Url
-
-    if (values.thumbnailUrl) {
-      formData.append('thumbnailUrl', values.thumbnailUrl); // optional (URL)
-    }
-
-    this.uploading = true;
-    this.videoService.addVideo(formData).subscribe({
-      next: () => {
-        this.uploading = false;
-        this.router.navigateByUrl('/videos');
-      },
-      error: () => {
-        this.uploading = false;
-        alert('Erreur lors de l\'envoi de la vidéo');
-      }
-    });
-  }
 }

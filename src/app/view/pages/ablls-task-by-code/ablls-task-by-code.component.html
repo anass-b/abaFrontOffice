@@ -1,80 +1,103 @@
-<div class="container py-4">
-  <h3 class="mb-3">📑 Tâches ABLLS par domaine</h3>
-
-  <!-- 🔍 Search + ➕ Bouton -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <input
-      type="text"
-      [(ngModel)]="search"
-      class="form-control w-50"
-      placeholder="Rechercher par code ou titre..."
-    />
-    <button class="btn btn-success ms-3" (click)="onAdd()">
-      ➕ Ajouter un Domaine
-    </button>
-  </div>
-
-  <!-- Liste des domaines -->
-  <div *ngIf="!selectedDomainName">
-    <div class="row">
-      <div
-        class="col-md-4 mb-3"
-        *ngFor="let domain of getFilteredDomains() | keyvalue : compareByPrefix"
-      >
-        <div class="card h-100 shadow-sm text-white bg-success">
-          <div class="card-body">
-            <div
-              class="avatar bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center"
-              style="width: 24px; height: 24px; font-weight: bold"
-            >
-              {{ domainMap[domain.key]?.prefix ?? '?' }}
-            </div>
-            <h5 class="card-title mt-2">{{ domain.key }}</h5>
-            <p class="card-text">{{ domain.value.length }} tâche(s)</p>
-            <button
-              class="btn btn-light btn-sm"
-              (click)="selectDomain(domain.key)"
-            >
-              Voir les tâches →
-            </button>
-          </div>
-        </div>
-      </div>
+<div class="ablls-wrapper container py-4">
+  <!-- Header -->
+  <div class="page-head">
+    <div class="hgroup">
+      <h1>🗂️ Tâches ABLLS par domaine</h1>
     </div>
   </div>
 
-  <!-- Liste des tâches d'un domaine -->
-  <div *ngIf="selectedDomainName">
-    <h4 class="mb-3">📌 Tâches pour le domaine : {{ selectedDomainName }}</h4>
-    <button class="btn btn-link mb-3" (click)="clearDomain()">← Retour</button>
+  <!-- Search / actions -->
+  <section class="panel">
+    <div class="controls">
+      <div class="search">
+        <span class="icon">🔎</span>
+        <input
+          type="text"
+          [(ngModel)]="search"
+          placeholder="Rechercher par code ou titre (ex. B4, imitation)…"
+        />
 
-    <div class="row">
-      <div
-        class="col-md-4 mb-4"
+        <!-- Catégories (domaines) -->
+        <div class="chips">
+          <button class="chip"
+                  [class.active]="!selectedChip"
+                  (click)="selectChip('')">Tous</button>
+          <button class="chip"
+                  *ngFor="let d of domainNames"
+                  [class.active]="selectedChip===d"
+                  (click)="selectChip(d)">
+            {{ d }}
+          </button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <select class="sort-select" [(ngModel)]="sortMode" (ngModelChange)="applySort()">
+          <option value="az">Tri : A-Z</option>
+          <option value="za">Tri : Z-A</option>
+          <option value="more">Tri : + de tâches</option>
+          <option value="less">Tri : - de tâches</option>
+        </select>
+
+        <button class="btn ghost" (click)="resetAll()">↻ Réinitialiser</button>
+        <button class="btn primary" *ngIf="auth.isAdmin" (click)="onAdd()">➕ Ajouter un Domaine</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOMAINES (cartes sombres) -->
+  <section *ngIf="!selectedDomainName">
+    <div class="domains-grid">
+      <article class="domain-card"
+               *ngFor="let domain of getFilteredDomains() | keyvalue : compareByPrefix"
+               [hidden]="selectedChip && selectedChip !== domain.key">
+        <div class="badge">{{ domainMap[domain.key]?.prefix ?? '?' }}</div>
+        <div class="name">{{ domain.key }}</div>
+        <div class="count">{{ domain.value.length }} tâche(s)</div>
+        <div class="cta">
+          <button class="btn primary" (click)="selectDomain(domain.key)">
+            Voir les tâches →
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- TÂCHES (cartes claires) -->
+  <section *ngIf="selectedDomainName">
+    <div class="subhead">
+      <h4>📌 Tâches pour le domaine : <strong>{{ selectedDomainName }}</strong></h4>
+      <button class="btn ghost" (click)="clearDomain()">← Retour</button>
+    </div>
+
+    <div class="tasks-grid">
+      <article
+        class="task-card"
         *ngFor="let task of getFilteredTasks(selectedDomainName)"
+        (click)="goToDetail(task.id!)"
       >
-        <div class="card h-100 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">{{ task.code }} - {{ task.title }}</h5>
-            <p class="card-text text-muted mb-2">
-              Domaine : {{ task.domain?.name ?? 'Inconnu' }}
-            </p>
-            <button
-              class="btn btn-outline-success btn-sm"
-              (click)="goToDetail(task.id!)"
-            >
-              Voir Détails
-            </button>
-          </div>
+        <div class="code">{{ task.code }}</div>
+        <div class="title">{{ task.title }}</div>
+        <div class="desc">
+          {{ task.description || ('Domaine : ' + (task.domain?.name ?? 'Inconnu')) }}
         </div>
-      </div>
+
+        <!-- chips dynamiques selon le modèle -->
+        <div class="chips-compact">
+          <span class="chip sm" *ngIf="task.domain?.name">{{ task.domain?.name }}</span>
+          <span class="chip sm alt" *ngIf="task.reference">{{ task.reference }}</span>
+          <span class="chip sm ok" *ngIf="task.status">{{ task.status }}</span>
+        </div>
+
+        <div class="cta-row" (click)="$event.stopPropagation()">
+          <button class="btn cta" (click)="goToDetail(task.id!)">Voir la fiche →</button>
+          <button class="btn outline"  (click)="viewBaseline(task.id)">Lignes de base</button>
+        </div>
+      </article>
     </div>
 
-    <div
-      *ngIf="getFilteredTasks(selectedDomainName).length === 0"
-      class="text-muted text-center"
-    >
+    <div *ngIf="getFilteredTasks(selectedDomainName).length === 0" class="empty-note">
       Aucun résultat pour ce domaine avec cette recherche.
     </div>
-  </div>
+  </section>
 </div>

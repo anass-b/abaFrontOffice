@@ -1,35 +1,52 @@
 <div class="layout-container d-flex min-vh-100 flex-column flex-lg-row">
-  <!-- Sidebar -->
-  <aside
-    class="bg-white border-end p-3 position-fixed h-100"
-    [class.d-none]="!isSidebarVisible && isMobile()"
-    [class.d-block]="isSidebarVisible || !isMobile()"
-    [class.d-lg-block]="true"
-    [style.width.px]="250"
-    [style.zIndex]="1040">
-    <app-menu></app-menu>
-  </aside>
+  <!-- ADMIN LAYOUT -->
+  <ng-container *ngIf="(auth.isAdmin$ | async); else clientLayout">
+    <!-- Sidebar -->
+    <aside
+      class="admin-sidebar border-end"
+      [class.d-none]="!isSidebarVisible && isMobile()"
+      [class.d-block]="isSidebarVisible || !isMobile()"
+      [class.d-lg-block]="true"
+      [style.width.px]="250"
+      aria-label="Sidebar de navigation"
+      [attr.aria-hidden]="!isSidebarVisible && isMobile() ? 'true' : 'false'">
+      <div class="menu p-3">
+        <app-menu></app-menu>
+      </div>
+    </aside>
 
-  <!-- Overlay (mobile only) -->
-  <div
-    *ngIf="isSidebarVisible && isMobile()"
-    class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-25"
-    (click)="toggleSidebar()"
-    style="z-index: 1039;">
-  </div>
+    <!-- Overlay (mobile only) -->
+    <div
+      *ngIf="isSidebarVisible && isMobile()"
+      class="overlay d-lg-none"
+      (click)="toggleSidebar()">
+    </div>
 
-  <!-- Main content -->
-  <div
-    class="flex-fill d-flex flex-column"
-    [style.marginLeft.px]="isSidebarVisible || !isMobile() ? 250 : 0"
-    style="transition: margin-left 0.3s;">
-    
-    <app-navbar (toggle)="toggleSidebar()"></app-navbar>
+    <!-- Main content -->
+    <div class="admin-main flex-fill d-flex flex-column">
+      <!-- Navbar admin : bouton hamburger + profil -->
+      <app-navbar
+        (toggle)="toggleSidebar()"
+        [showToggle]="isMobile()"
+        [showAdminProfileMenu]="true">
+      </app-navbar>
 
-    <main class="flex-fill container-fluid px-3 py-4">
-      <router-outlet></router-outlet>
-    </main>
+      <main class="admin-page flex-fill">
+        <router-outlet></router-outlet>
+      </main>
 
-    <app-footer></app-footer>
-  </div>
+      <app-footer></app-footer>
+    </div>
+  </ng-container>
+
+  <!-- CLIENT LAYOUT (inchangé) -->
+  <ng-template #clientLayout>
+    <div class="main-content flex-fill d-flex flex-column">
+      <app-navbar [showToggle]="false" [showAdminProfileMenu]="false"></app-navbar>
+      <main class="page-wrapper flex-fill container-fluid px-3 py-2">
+        <router-outlet></router-outlet>
+      </main>
+      <app-footer></app-footer>
+    </div>
+  </ng-template>
 </div>

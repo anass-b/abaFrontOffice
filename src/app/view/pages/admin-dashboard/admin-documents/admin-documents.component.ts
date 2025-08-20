@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DocumentService } from '../../../../services/document/document.service';
 import { RouterLink } from '@angular/router';
 import { Document } from '../../../../models/document.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-documents',
@@ -14,6 +15,7 @@ import { Document } from '../../../../models/document.model';
 export class AdminDocumentsComponent implements OnInit {
   documentService = inject(DocumentService);
   documents: Document[] = [];
+  router = inject(Router)
 
   ngOnInit() {
     this.fetchDocuments();
@@ -24,6 +26,15 @@ export class AdminDocumentsComponent implements OnInit {
       this.documents = data;
     });
   }
+  goToEditDocument(doc: Document): void {
+  this.router.navigate(['/admin/documents/new'], {
+    state: {
+      updateMode: true,
+      document: doc
+    }
+  });
+}
+
 
   deleteDocument(id: number | undefined) {
     if (confirm('Supprimer ce document ?')) {

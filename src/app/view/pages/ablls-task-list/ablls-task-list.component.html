@@ -1,94 +1,129 @@
-  <div class="container py-4">
-    <h1 class="mb-3 text-center">Taches ABLLS-R</h1>
+<div class="ablls-list-wrapper container py-4">
+  <!-- Titre -->
+  <div class="page-head mb-2">
+    <h1 class="m-0">🧩 Tâches ABLLS-R</h1>
+  </div>
 
-    <!-- Champ de recherche dynamique -->
-  <div class="input-group mb-4 align-items-center">
-      <input
-        type="text"
-        [(ngModel)]="search"
-        (ngModelChange)="onSearchChange($event)"
-        class="form-control rounded-start-pill px-4"
-        [disabled]="!isReady"
-        [placeholder]="selectedDomain ? '🔍 Rechercher une tâche...' : selectedCategory ? '🔍 Rechercher un domaine...' : '🔍 Rechercher une catégorie...'"
-      />
-      <button class="btn btn-outline-primary px-4" (click)="search = ''">Réinitialiser</button>
-      <button
-        class="btn btn-success rounded-end-pill px-4 ms-2"
-        *ngIf="selectedDomain"
-        (click)="goToAddTask()"
-      >
-        ➕ Ajouter une tâche
-      </button>
-    </div>
+  <!-- Barre de recherche / actions -->
+  <section class="toolbar card border-0 shadow-sm mb-3">
+    <div class="tool-row">
+      <!-- Recherche -->
+      <div class="search">
+        <span class="icon">🔎</span>
+        <input
+          type="text"
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchChange($event)"
+          [disabled]="!isReady"
+          placeholder="Rechercher par code, titre, domaine ou catégorie… (ex. B4, Imitation)"
+        />
+      </div>
 
-    <!-- 📚 Catégories -->
-    <div *ngIf="!selectedCategory && !selectedDomain && isReady">
-      <h4 class="mb-3">📚 Catégories ABLLS-R</h4>
-      <div class="row">
-        <div class="col-md-4 mb-3" *ngFor="let category of getFilteredCategories()">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">{{ category }}</h5>
-              <p class="card-text">{{ getTotalDomainsInCategory(category) }} domaine(s)</p>
-              <button class="btn btn-primary btn-sm" (click)="selectCategory(category)">Voir les domaines →</button>
-            </div>
-          </div>
-        </div>
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn ghost" (click)="clearSearch()">↻ Réinitialiser</button>
+        <button class="btn primary" *ngIf="auth.isAdmin" (click)="goToAddTask()">➕ Ajouter une tâche</button>
       </div>
     </div>
 
-    <!-- 📁 Domaines -->
-    <div *ngIf="selectedCategory && !selectedDomain">
-      <h4 class="mb-3">📁 Domaines de la catégorie : {{ selectedCategory }}</h4>
-      <button class="btn btn-outline-secondary rounded-pill px-4 mb-3" (click)="clearCategory()">← Retour aux catégories</button>
+    <!-- Chips catégories / domaines -->
+    <div class="chips-row">
+      <button class="chip" [class.active]="!search" (click)="onSearchChange('')">Tous</button>
 
-      <div class="row">
-        <div class="col-12 col-sm-6 col-lg-3 mb-4" *ngFor="let domain of getFilteredDomains()">
-          <div class="card h-100 text-white border-0 shadow-sm rounded-4" style="background: linear-gradient(145deg, #1e1e2f, #2c2c3e);">
-            <div class="card-body d-flex flex-column justify-content-between">
-              <div>
-                <div class="avatar bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 28px; height: 28px; font-weight: bold;">
-                  {{ domainMap[domain]?.prefix }}
-                </div>
-                <h5 class="card-title">{{ domain }}</h5>
-                <p class="card-text">{{ groupedByCategory[selectedCategory][domain].length }} tâche(s)</p>
-              </div>
-              <button class="btn btn-info w-100 rounded-pill mt-3" (click)="selectDomain(domain)">Ouvrir</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 📌 Tâches -->
-    <!-- 📌 Tâches -->
-  <div *ngIf="selectedDomain">
-    <h4 class="mb-3">
-      📌
-      <ng-container *ngIf="selectedDomain === '__ALL__'; else domainTitle">
-        Tâches de la catégorie : {{ selectedCategory }}
+      <!-- Catégories -->
+      <ng-container *ngFor="let c of categories">
+        <button
+          class="chip"
+          [class.active]="search?.toLowerCase() === (c.name||'').toLowerCase()"
+          (click)="onSearchChange(c.name||'')"
+          title="Catégorie"
+        >
+          {{ c.name }}
+        </button>
       </ng-container>
-      <ng-template #domainTitle>
-        Tâches du domaine : {{ selectedDomain }}
-      </ng-template>
-    </h4>
 
-    <button class="btn btn-outline-secondary rounded-pill px-4 mb-3" (click)="clearDomain()">
-      ← Retour aux domaines
-    </button>
+      <!-- Domaines -->
+      <ng-container *ngFor="let d of domains">
+        <button
+          class="chip soft"
+          [class.active]="search?.toLowerCase() === (d.name||'').toLowerCase()"
+          (click)="onSearchChange(d.name||'')"
+          title="Domaine"
+        >
+          {{ d.name }}
+        </button>
+      </ng-container>
+    </div>
 
-    <div class="row">
-      <div class="col-12 col-sm-6 col-lg-3 mb-4" *ngFor="let task of getFilteredTasks()">
-        <div class="card h-100 border-0 shadow-sm rounded-4" (click)="goToDetail(task.id!)">
-          <div class="card-body">
-            <h5 class="card-title fw-semibold" style="color: rgb(0, 0, 36);">
-              {{ task.code }} - {{ task.title }}
-            </h5>
-            <p class="card-text text-muted mb-2">{{ task.description }}</p>
+    <!-- Indication de correspondance -->
+    <div class="match-hint" *ngIf="matchedBy">
+      Résultats correspondant au <strong>{{ matchedByLabel[matchedBy!] }}</strong>.
+    </div>
+  </section>
+
+  <!-- Grille des tâches -->
+  <section *ngIf="isReady">
+    <h4 class="subhead">📋 Toutes les tâches ABLLS-R</h4>
+
+    <div class="tasks-grid">
+      <article
+        class="tcard"
+        *ngFor="let task of paginatedTasks"
+        (click)="goToDetail(task.id!)"
+        tabindex="0"
+      >
+        <div class="code">{{ task.code }}</div>
+        <h3 class="title" [title]="task.title">{{ task.title }}</h3>
+        <p class="desc">
+          {{ task.description || '—' }}
+        </p>
+
+       <div class="chips-compact">
+  <!-- Domain tag -->
+<span class="badge bg-info-subtle text-dark me-1"
+      *ngIf="$any(task).__domainName">
+  {{ $any(task).__domainName }}
+</span>
+
+<span class="badge bg-warning-subtle text-dark"
+      *ngIf="$any(task).__categoryName">
+  {{ $any(task).__categoryName }}
+</span>
+
+
+</div>
+
+
+        <div class="cta-row" (click)="$event.stopPropagation()">
+          <button class="btn cta" (click)="goToDetail(task.id!)">Voir la fiche →</button>
+
+          <div class="admin" *ngIf="auth.isAdmin">
+            <button class="btn outline" (click)="onEdit(task)">Modifier</button>
+            <button class="btn danger"  (click)="onDelete(task)">Supprimer</button>
           </div>
         </div>
-      </div>
+      </article>
     </div>
-  </div>
 
-  </div>
+    <!-- Pagination -->
+    <nav *ngIf="totalPages > 1" class="mt-3">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">«</button>
+        </li>
+
+        <li
+          class="page-item"
+          *ngFor="let _ of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === i + 1"
+        >
+          <button class="page-link" (click)="currentPage = i + 1">{{ i + 1 }}</button>
+        </li>
+
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">»</button>
+        </li>
+      </ul>
+    </nav>
+  </section>
+</div>

@@ -36,8 +36,17 @@
 </div>
 
 
-    <label class="form-label">Fichier PDF/Image (facultatif)</label>
-    <input type="file" class="form-control mb-4" (change)="onFileChange($event)" />
+   <!-- Fichier -->
+<div class="mb-3">
+  <label class="form-label">Fichier PDF/Image (facultatif)</label>
+  <input
+    type="file"
+    class="form-control"
+    (change)="onFileChange($event)"
+    accept=".pdf,.jpg,.jpeg,.png"
+  />
+</div>
+
 
     <button type="submit" class="btn btn-success w-100">Enregistrer</button>
   </form>

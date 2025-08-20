@@ -79,6 +79,17 @@ export class AuthService {
   return this.http.post(`${environment.apiUrl}/user/register`, user);
 }
 
+// auth.service.ts
+isUserAdmin(): boolean {
+  const user = this.getCurrentUser(); // récupère l'objet user décodé du JWT
+  return user?.isAdmin === true;
+}
+
+isUserClient(): boolean {
+  return !this.isUserAdmin();
+}
+
+
 
   // ♻️ Refresh JWT + RefreshToken
   refreshTokens(tokens : any): Observable<any> {

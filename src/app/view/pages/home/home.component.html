@@ -1,100 +1,124 @@
-<div class="hero">
-  <div class="hero-content">
-    <h1>
-      Développez vos compétences en <span>ABA</span><br />
-      avec nos formations <span>vidéo expertes</span>.
-    </h1>
-    <p>
-      Accédez dès maintenant à des heures de vidéos, de fiches pratiques, de
-      modules et d'exercices.
-    </p>
-    <button class="btn-primary">Découvrir les Abonnements</button>
-  </div>
-</div>
+<div class="home-wrapper">
 
-<div class="section">
-  <h2>
-    Nos dernières nouveautés
-    <a class="see-all" [routerLink]="['/videos']">Voir tout le catalogue</a>
-  </h2>
-  <div class="cards">
-    <div class="card">
-      <div class="thumbnail">
-        <!-- Placeholder image -->
-        <img src="https://via.placeholder.com/300x120" alt="Vidéo 1" />
-        <span class="badge">📹</span>
-      </div>
-      <h3>Principes fondamentaux de l’ABA</h3>
-      <p>Introduction aux bases de l'analyse comportementale appliquée.</p>
+
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>
+        Modules d’accueil — <span>Aperçu</span>
+      </h1>
+      <p>
+        Développez vos compétences en <strong>ABA</strong> avec des vidéos expertes, fiches pratiques et modules.
+      </p>
+      <a routerLink="/subscription" class="btn btn-primary">S’abonner maintenant</a>
     </div>
-    <div class="card">
-      <div class="thumbnail">
-        <img src="https://via.placeholder.com/300x120" alt="Vidéo 2" />
-        <span class="badge">📹</span>
+  </section>
+
+  <section class="grid2">
+    <!-- Colonne gauche : Tâches les plus regardées -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Tâches les plus regardées</h3>
+        <a class="see-all" routerLink="/tasks">Voir tout</a>
       </div>
-      <h3>Actes des renforcements</h3>
-      <p>Comprendre l’impact des renforcements dans les apprentissages.</p>
+
+      <div class="tasks-list">
+        <!-- Affiche seulement si tu fournis topTasks[] ; sinon masque automatiquement -->
+        <div class="task-row" *ngFor="let t of topTasks; let i = index">
+          <div class="rank">{{ i + 1 }}</div>
+          <div class="task-main">
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-sub">
+              <span class="chip">{{ t.domainPrefix }} — {{ t.domainName }}</span>
+              <span class="muted">ID {{ t.code }}</span>
+            </div>
+          </div>
+          <div class="task-meta">
+           <span class="views">
+  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" fill="currentColor"/>
+  </svg>
+  {{ (t.views ?? 0) | number }}
+</span>
+            <a class="btn btn-link" (click)="goToDetail(t.id!)">↪ Ouvrir</a>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="!topTasks?.length">
+          Aucune statistique disponible pour le moment.
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <div class="thumbnail">
-        <img src="https://via.placeholder.com/300x120" alt="Vidéo 3" />
-        <span class="badge">📹</span>
+
+    <!-- Colonne droite : Dernières vidéos -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Dernières vidéos ajoutées</h3>
+        <a class="see-all" routerLink="/videos">Voir tout</a>
       </div>
-      <h3>Actions contextes et conséquences</h3>
-      <p>Analyse des liens entre comportements et contexte.</p>
+
+      <div class="video-grid" *ngIf="!isLoading; else loadingBlock">
+        <div class="video-card" *ngFor="let v of latestVideos" (click)="openVideo(v.id)">
+          <div class="thumb">
+            <img [src]="absoluteUrl(v.thumbnailUrl) || 'https://via.placeholder.com/480x270'" [alt]="v.title" />
+            <div class="play">
+              <span></span>
+            </div>
+            <div class="corner-badge" *ngIf="v.isPremium">Premium</div>
+          </div>
+          <div class="v-body">
+            <div class="v-title">{{ v.title }}</div>
+            <div class="v-meta">
+              <span class="chip" *ngFor="let c of (v.categories || [])">{{ c }}</span>
+              <span class="pill" *ngIf="v.duration">{{ formatDuration(v.duration) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <div class="thumbnail">
-        <img src="https://via.placeholder.com/300x120" alt="Vidéo 4" />
-        <span class="badge">📹</span>
+  </section>
+
+  <!-- Ressources récentes -->
+  <section class="panel full">
+    <div class="panel-header">
+      <h3>Ressources récentes</h3>
+      <a class="see-all" routerLink="/documents">Voir tout</a>
+    </div>
+
+    <ul class="resource-list" *ngIf="!isLoading; else loadingBlock">
+     <li class="resource-row" *ngFor="let d of recentDocs">
+  <div class="left">
+    <!-- file badge (positioned top-left of the preview via CSS) -->
+    <span class="ext" [ngClass]="fileExtClass(d.fileUrl)">{{ fileExt(d.fileUrl) }}</span>
+
+    <div class="meta">
+      <div class="title">{{ d.title }}</div>
+
+      <!-- details: EXT · dd/MM/yyyy -->
+      <div class="details">
+        <span>{{ fileExt(d.fileUrl) }}</span>
+        <span *ngIf="d.updatedAt || d.createdAt">
+          {{ (d.updatedAt || d.createdAt) | date:'dd/MM/yyyy' }}
+        </span>
       </div>
-      <h3>Consultation en régulation</h3>
-      <p>Appliquer l’ABA pour des cas spécifiques.</p>
+
+      <!-- optional categories as chips (shown only if present) -->
+      <div class="ftags" *ngIf="d.categories?.length">
+        <span class="ftag" *ngFor="let c of d.categories">{{ c }}</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="section testimonials">
-  <h2>Ce qu’ils pensent de nos formations</h2>
-  <div class="testimonials-grid">
-    <div class="testimonial">
-      <div class="avatar"></div>
-      <strong>David</strong>
-      <p>★★★★★</p>
-    </div>
-    <div class="testimonial">
-      <div class="avatar"></div>
-      <strong>Emilie</strong>
-      <p>★★★★★</p>
-    </div>
-    <div class="testimonial">
-      <div class="avatar"></div>
-      <strong>Thomas</strong>
-      <p>★★★★★</p>
-    </div>
+  <div class="right">
+    <button class="btn ghost" (click)="openDocument(d.id)">Lire</button>
+    <a class="btn outline" *ngIf="d.fileUrl" [href]="d.fileUrl" download>Télécharger</a>
   </div>
-</div>
+</li>
 
-<div class="section features">
-  <div class="feature-col">
-    <h3>Pourquoi choisir<br /><span>[Nom de la Plateforme]</span> ?</h3>
-    <ul>
-      <li>✅ Experts reconnus</li>
-      <li>✅ Contenus actualisés</li>
-      <li>✅ Apprentissage flexible</li>
-      <li>✅ Support dédié</li>
-      <li>✅ Chemins d'apprentissage</li>
     </ul>
-  </div>
-  <div class="feature-col highlight">
-    <h4>Débloquez un savoir illimité.</h4>
-    <p>
-      Bénéficiez d’un accès complet à tous nos supports, cours et vidéos à
-      travers un seul abonnement.
-    </p>
-    <button class="btn-primary">
-        
-        <a class="link" style="text-decoration: none;" [routerLink] = "['/subscription']"> S’abonner maintenant</a>
-    </button>
-  </div>
+  </section>
+
+  <ng-template #loadingBlock>
+    <div class="loading">Chargement…</div>
+  </ng-template>
 </div>

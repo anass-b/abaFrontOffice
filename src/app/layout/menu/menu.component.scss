@@ -1,0 +1,23 @@
+.aside {
+  color: white;
+}
+
+nav a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+nav a:hover {
+  background: #55589e;
+}
+
+nav a.active {
+  background: #44476b;
+  font-weight: bold;
+}

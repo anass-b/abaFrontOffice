@@ -1,118 +1,193 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 import { DocumentService } from '../../../services/document/document.service';
-import { Document } from '../../../models/document.model';
-import { SharedService } from '../../../services/shared/shared.service';
 import { AuthService } from '../../../services/auth/auth.service';
-import { CategoryService } from '../../../services/category/category.service';
-import { Category } from '../../../models/category.model';
+import { Document } from '../../../models/document.model';
+
+type SortKey = 'recent' | 'title' | 'type';
 
 @Component({
   selector: 'app-document-library',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './document-library.component.html',
-  styleUrls: ['./document-library.component.scss']
+  styleUrls: ['./document-library.component.scss'],
 })
 export class DocumentLibraryComponent implements OnInit {
-  documentService = inject(DocumentService);
-  router = inject(Router);
-  shared = inject(SharedService);
+  // Services
+  private documentService = inject(DocumentService);
   auth = inject(AuthService);
-  categoryService = inject(CategoryService);
+  private router = inject(Router);
 
+   // Données
   documents: Document[] = [];
   filteredDocuments: Document[] = [];
-  categories: Category[] = [];
+
+  // UI state
+  categories: string[] = [];
   selectedCategory: string = '';
   searchTerm: string = '';
-  loading = true;
+  sortBy: SortKey = 'recent';
+
+  // Pagination
+  pageSize = 16;                 // 4 x 4
+  paginationThreshold = 12;      // n’affiche la barre que si > 12
+  currentPage = 1;
+  totalPages = 1;
+  pages: number[] = [];
+
+  get pagedDocuments(): Document[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredDocuments.slice(start, start + this.pageSize);
+  }
 
   ngOnInit(): void {
-    this.loadCategories();
     this.loadDocuments();
   }
 
-  loadCategories(): void {
-    this.categoryService.getAll().subscribe({
-      next: (cats) => this.categories = cats,
-      error: () => this.shared.displaySnackBar("Erreur lors du chargement des catégories")
+  // ================= Load =================
+  private loadDocuments(): void {
+    this.documentService.fetchDocuments().subscribe({
+      next: (docs) => {
+        this.documents = (docs ?? []).slice();
+        this.buildCategories(this.documents);
+        this.filterDocuments(); // initial
+      },
+      error: () => {
+        this.documents = [];
+        this.filteredDocuments = [];
+        this.recomputePagination();
+      },
     });
   }
 
-  loadDocuments(): void {
-    this.documentService.fetchDocuments().subscribe({
-      next: (docs) => {
-        this.documents = docs.filter(doc =>
-          this.auth.isAdmin ||
-          this.auth.isOwner({ createdBy: doc.createdBy! }) ||
-          this.auth.hasAccessToContent({ isPremium: doc.isPremium!, createdBy: doc.createdBy! })
-        );
-        this.filterDocuments();
-        this.loading = false;
-      },
-      error: () => {
-        this.shared.displaySnackBar("Erreur lors du chargement des documents");
-        this.loading = false;
+  private buildCategories(docs: Document[]): void {
+    const set = new Set<string>();
+    for (const d of docs) {
+      for (const c of (d.categories ?? [])) {
+        const name = (c ?? '').trim();
+        if (name) set.add(name);
       }
-    });
+    }
+    this.categories = Array.from(set).sort((a, b) =>
+      a.localeCompare(b, 'fr', { sensitivity: 'base' })
+    );
+  }
+
+  // ================= Filtering & sorting =================
+  onCategorySelected(name: string): void {
+    this.selectedCategory = name;
+    this.filterDocuments();
+  }
+
+  resetFilters(): void {
+    this.selectedCategory = '';
+    this.searchTerm = '';
+    this.sortBy = 'recent';
+    this.filterDocuments();
   }
 
   filterDocuments(): void {
-  this.filteredDocuments = this.documents.filter(doc =>
-    (!this.selectedCategory || doc.categories?.some(cat => cat.name === this.selectedCategory)) &&
-    (!this.searchTerm || doc.title?.toLowerCase().includes(this.searchTerm.toLowerCase()))
-  );
-}
+    const q = (this.searchTerm ?? '').trim().toLowerCase();
 
-  onCategorySelected(categoryName: string): void {
-    this.selectedCategory = categoryName;
-    this.filterDocuments();
+    let list = this.documents.filter((d) => {
+      if (this.selectedCategory) {
+        const cats = d.categories ?? [];
+        const hit = cats.some(
+          (c) => (c ?? '').toLowerCase() === this.selectedCategory.toLowerCase()
+        );
+        if (!hit) return false;
+      }
+
+      if (q) {
+        const hay = [
+          d.title ?? '',
+          d.description ?? '',
+          (d.categories ?? []).join(' ')
+        ].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    switch (this.sortBy) {
+      case 'recent':
+        list.sort((a, b) =>
+          this.dateDesc(a.updatedAt || a.createdAt, b.updatedAt || b.createdAt)
+        );
+        break;
+      case 'title':
+        list.sort((a, b) =>
+          (a.title ?? '').localeCompare(b.title ?? '', 'fr', { sensitivity: 'base' })
+        );
+        break;
+      case 'type':
+        list.sort((a, b) =>
+          this.getFileExtension(a.fileUrl).localeCompare(this.getFileExtension(b.fileUrl))
+        );
+        break;
+    }
+
+    this.filteredDocuments = list;
+
+    // Reset page to 1 à chaque filtre/tri
+    this.currentPage = 1;
+    this.recomputePagination();
   }
 
-  onSearch(): void {
-    this.filterDocuments();
+  // ================= Pagination =================
+  private recomputePagination(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.filteredDocuments.length / this.pageSize));
+    // pages simples 1..N (tu peux faire des ellipses si besoin)
+    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  getFileExtension(fileUrl: string | undefined): string {
-    const parts = fileUrl?.split('.');
-    return parts?.length ? parts.pop()?.toUpperCase() || '' : '';
+  goToPage(p: number): void {
+    if (p < 1 || p > this.totalPages) return;
+    this.currentPage = p;
+    // Optionnel: remonter en haut de la grid
+    try {
+      document.querySelector('.doc-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch {}
   }
 
-  docExtensionClass(fileUrl: string | undefined): string {
-    const ext = this.getFileExtension(fileUrl).toLowerCase();
-    return ext === 'pdf' ? 'pdf' : ext === 'xls' || ext === 'xlsx' ? 'xls' : ext === 'pshi' ? 'pshi' : '';
-  }
-
+  // ================= Actions =================
   createDocument(): void {
-    this.router.navigateByUrl('/documents/new');
+    this.router.navigateByUrl('/admin/documents/new');
   }
 
-  viewDocument(id: number | undefined): void {
+  viewDocument(id?: number): void {
     if (!id) return;
     this.router.navigate(['/documents', id, 'view']);
   }
 
-  viewDetails(docId: number | undefined): void {
-    this.router.navigate(['/documents', docId]);
+  // ================= Helpers =================
+  getFileExtension(url?: string): string {
+    if (!url) return '';
+    const p = url.split('?')[0];
+    const dot = p.lastIndexOf('.');
+    if (dot < 0) return '';
+    return p.substring(dot + 1).toUpperCase();
   }
 
-  editDocument(doc: Document): void {
-    this.router.navigate(['/documents/edit', doc.id]);
+  docExtensionClass(url?: string): string {
+    const ext = this.getFileExtension(url).toLowerCase();
+    if (ext === 'pdf') return 'pdf';
+    if (ext === 'doc' || ext === 'docx') return 'doc';
+    if (ext === 'xls' || ext === 'xlsx') return 'xls';
+    if (ext === 'ppt' || ext === 'pptx') return 'ppt';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'img';
+    if (['zip', 'rar', '7z'].includes(ext)) return 'zip';
+    return 'file';
   }
 
-  deleteDocument(docId: number | undefined): void {
-    this.shared.openConfirmationDialog('Voulez-vous supprimer ce document ?', false)
-      .afterClosed().subscribe(result => {
-        if (result === true) {
-          this.documentService.deleteDocument(docId).subscribe(() => {
-            this.shared.displaySnackBar("Document supprimé");
-            this.loadDocuments();
-          });
-        }
-      });
+  private dateDesc(a?: string, b?: string): number {
+    const ta = a ? new Date(a).getTime() : 0;
+    const tb = b ? new Date(b).getTime() : 0;
+    return tb - ta;
   }
 }
+

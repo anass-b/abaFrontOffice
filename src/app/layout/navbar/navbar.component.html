@@ -1,30 +1,45 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm px-3">
-  <div class="container-fluid justify-content-between">
-    
-    <!-- Mobile toggler -->
-    <button class="btn d-lg-none" (click)="toggle.emit()">
-      <i class="bi bi-list fs-4"></i>
-    </button>
+<nav class="navbar-dark-theme">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <!-- Brand (badge comes from CSS ::before) -->
+    <a class="brand fw-bold" [routerLink]="['/home']">Kenane.IO</a>
 
-    <span class="navbar-brand fw-bold">ABA Platform</span>
+    <!-- Links (pills) -->
+    <ul class="nav-links d-flex align-items-center">
+      <li>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
+      </li>
 
-    <div class="d-flex align-items-center gap-3">
-      <!-- Settings -->
-      <button class="btn btn-outline-secondary d-none d-md-inline" title="Paramètres">
-        <i class="bi bi-gear-fill fs-5"></i>
-      </button>
-
-      <!-- User Dropdown -->
-      <div class="dropdown">
-        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          <i class="bi bi-person-circle fs-5"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" [routerLink]="['/profile']">Voir le profil</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><button class="dropdown-item text-danger" (click)="logout()">Déconnexion</button></li>
+      <li class="dropdown">
+        <a class="dropdown-toggle" href="#" id="ressourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Ressources
+        </a>
+        <ul class="dropdown-menu custom-dropdown" aria-labelledby="ressourcesMenu">
+          <li><a class="dropdown-item" routerLink="/documents">📚 Documents</a></li>
+          <li><a class="dropdown-item" routerLink="/videos">🎬 Vidéos</a></li>
         </ul>
-      </div>
+      </li>
+
+      <li><a routerLink="/ablls" routerLinkActive="active">Domaines</a></li>
+      <li><a routerLink="/taches" routerLinkActive="active">Tâches</a></li>
+      <li><a routerLink="/baselines" routerLinkActive="active">Lignes de Base</a></li>
+    </ul>
+
+    <!-- Optional search (styled by .navbar-dark-theme .searchbar in your SCSS) -->
+    <div class="searchbar d-none d-lg-block">
+      <span class="icon">🔍</span>
+      <input type="text" placeholder="Rechercher une vidéo, un tag…"/>
+    </div>
+
+    <!-- User Dropdown -->
+    <div class="dropdown">
+      <button class="btn-user" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu utilisateur">
+        <i class="bi bi-person-circle fs-5"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+        <li><a class="dropdown-item" [routerLink]="['/profile']">Voir le profil</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><button class="dropdown-item text-danger" (click)="logout()">Déconnexion</button></li>
+      </ul>
     </div>
   </div>
 </nav>

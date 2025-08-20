@@ -76,25 +76,34 @@ onCriteriaSelected(critId: number) {
 
 
 
-  onSubmit(): void {
-    if (this.form.invalid || (!this.selectedFile && !this.form.value.contentHtml)) {
-      alert('Veuillez remplir les champs obligatoires ou fournir un contenu/fichier.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('abllsTaskId', this.form.value.abllsTaskId);
-    formData.append('criteriaId', this.form.value.criteriaId);
-    if (this.form.value.contentHtml) {
-      formData.append('contentHtml', this.form.value.contentHtml);
-    }
-    if (this.selectedFile) {
-      formData.append('file', this.selectedFile);
-    }
-
-    this.baselineService.create(formData).subscribe({
-      next: () => this.router.navigate(['/ablls']), // 🔁 Redirection personnalisable
-      error: err => console.error('Erreur ajout contenu ligne de base', err)
-    });
+onSubmit(): void {
+  if (this.form.invalid || (!this.selectedFile && !this.form.value.contentHtml)) {
+    alert('Veuillez remplir les champs obligatoires ou fournir un contenu/fichier.');
+    return;
   }
+
+  const formData = new FormData();
+
+  // Toujours en string (sinon ASP.NET ne bind pas correctement)
+  formData.append('AbllsTaskId', String(this.form.value.abllsTaskId));
+  formData.append('CriteriaId', String(this.form.value.criteriaId));
+
+  if (this.form.value.contentHtml) {
+    formData.append('ContentHtml', this.form.value.contentHtml);
+  }
+
+  if (this.selectedFile) {
+    // ⚠️ Le nom doit correspondre au DTO côté .NET : "File"
+    formData.append('File', this.selectedFile, this.selectedFile.name);
+  }
+
+  this.baselineService.create(formData).subscribe({
+    next: res => {
+      console.log("✅ BaselineContent créé :", res);
+      this.router.navigate(['/ablls']);
+    },
+    error: err => console.error('❌ Erreur ajout contenu ligne de base', err)
+  });
+}
+  
 }

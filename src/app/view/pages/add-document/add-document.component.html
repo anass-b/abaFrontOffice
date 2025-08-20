@@ -17,6 +17,9 @@
         class="form-control"
         placeholder="Ex. Grille d’évaluation pour enfants autistes"
       />
+      <div class="text-danger small mt-1" *ngIf="documentForm.get('title')?.touched && documentForm.get('title')?.invalid">
+        Le titre est requis.
+      </div>
     </div>
 
     <!-- Description -->
@@ -31,68 +34,50 @@
       ></textarea>
     </div>
 
-    <!-- Catégories -->
+    <!-- Catégories (ResourceCategory IDs) -->
     <div class="mb-3">
-      <label for="categories" class="form-label">Catégorie(s)</label>
+      <label class="form-label">Catégorie(s)</label>
       <ng-select
         [items]="allCategories"
         bindLabel="name"
-        bindValue="name"
+        bindValue="id"
         [multiple]="true"
-        formControlName="categories"
+        formControlName="categoryIds"
         placeholder="Choisir les catégories"
         class="w-100"
       ></ng-select>
     </div>
 
-    <!-- URL du document (externe) -->
+    <!-- Fichier (upload local) -->
     <div class="mb-3">
-      <label for="url" class="form-label">URL du document *</label>
+      <label for="file" class="form-label">Fichier *</label>
       <input
-        id="url"
-        type="url"
+        id="file"
+        type="file"
         class="form-control"
-        formControlName="url"
-        placeholder="https://exemple.com/mon-document.pdf"
+        (change)="onFileSelected($event)"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
       />
-      <small class="text-muted d-block mt-1">
-        Le document sera référencé par lien externe (pas d’upload).
-      </small>
-      <div
-        class="text-danger small mt-1"
-        *ngIf="documentForm.get('url')?.invalid && documentForm.get('url')?.touched"
-      >
-        Saisissez une URL valide commençant par http(s)://
+      <div class="text-muted mt-1">
+        Formats acceptés : pdf, doc(x), xls(x), ppt(x), txt, jpg, png — max 50&nbsp;MB.
+      </div>
+      <div class="text-danger small mt-1" *ngIf="documentForm.get('file')?.touched && documentForm.get('file')?.invalid">
+        Le fichier est requis.
       </div>
     </div>
 
     <!-- Premium -->
     <div class="form-check mb-4">
-      <input
-        type="checkbox"
-        class="form-check-input"
-        formControlName="isPremium"
-        id="premiumCheck"
-      />
-      <label class="form-check-label" for="premiumCheck">
-        Marquer comme contenu Premium
-      </label>
+      <input type="checkbox" class="form-check-input" formControlName="isPremium" id="premiumCheck" />
+      <label class="form-check-label" for="premiumCheck">Marquer comme contenu Premium</label>
     </div>
 
     <!-- Boutons -->
     <div class="d-flex justify-content-end gap-3">
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="uploading || documentForm.invalid"
-      >
+      <button type="submit" class="btn btn-primary" [disabled]="uploading || documentForm.invalid">
         {{ uploading ? 'Envoi en cours...' : ' Enregistrer' }}
       </button>
-      <button
-        type="button"
-        class="btn btn-outline-secondary"
-        (click)="router.navigateByUrl('/documents')"
-      >
+      <button type="button" class="btn btn-outline-secondary" (click)="router.navigateByUrl('/documents')">
         Annuler
       </button>
     </div>

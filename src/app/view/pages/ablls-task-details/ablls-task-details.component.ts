@@ -6,6 +6,8 @@ import { AbllsTask } from '../../../models/ablls-task.model';
 import { environment } from '../../../../environments/environments';
 import {inject} from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
+import { BaselineContentService } from '../../../services/baseline-content/baseline-content.service';
+import { BaselineContent } from '../../../models/baseline-content.model';
 
 @Component({
   selector: 'app-ablls-task-details',
@@ -18,10 +20,12 @@ export class AbllsTaskDetailsComponent implements OnInit {
   task: AbllsTask | null = null;
   selectedCategory: string | null = null;
   selectedDomain: string | null = null;
+   baselines: BaselineContent[] = []; 
 
   baseUrl = environment.fileBaseUrl;
   route = inject(ActivatedRoute);
   taskService = inject(AbllsTaskService);
+  baselineService = inject(BaselineContentService); 
   sanitizer = inject(DomSanitizer);
 
   
@@ -32,6 +36,10 @@ export class AbllsTaskDetailsComponent implements OnInit {
       next: (data) => (this.task = data),
       error: (err) => console.error('Erreur chargement tâche', err)
     });
+    this.baselineService.fetchByTaskId(taskId).subscribe({
+        next: (data) => (this.baselines = data || []),
+        error: (err) => console.error('Erreur chargement baselines', err)
+      });
   }
 
   // 👉 Extraire les paramètres pour retour intelligent

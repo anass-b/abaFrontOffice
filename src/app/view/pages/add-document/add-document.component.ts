@@ -1,11 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DocumentService } from '../../../services/document/document.service';
 import { Router } from '@angular/router';
-import { Category } from '../../../models/category.model';
-import { CategoryService } from '../../../services/category/category.service';
 import { NgSelectModule } from '@ng-select/ng-select';
+
+import { DocumentService } from '../../../services/document/document.service';
+import { ResourceCategoryService } from '../../../services/resource-category/resource-category.service';
+import { SharedService } from '../../../services/shared/shared.service';
+
+import { ResourceCategory } from '../../../models/resource-category.model';
+import { DocumentCreateRequest, DocumentUpdateRequest } from '../../../models/document.model';
 
 @Component({
   selector: 'app-add-document',
@@ -17,58 +21,117 @@ import { NgSelectModule } from '@ng-select/ng-select';
 export class AddDocumentComponent implements OnInit {
   fb = inject(FormBuilder);
   documentService = inject(DocumentService);
-  categoryService = inject(CategoryService);
+  rcService = inject(ResourceCategoryService);
+  shared = inject(SharedService);
   router = inject(Router);
 
-  allCategories: Category[] = [];
+  allCategories: ResourceCategory[] = [];
+  updateMode = false;
+docIdToEdit?: number;
+rowVersion?: number;
+
 
   documentForm: FormGroup = this.fb.group({
     title: ['', Validators.required],
     description: [''],
-    categories: [[], Validators.required],
-    url: ['', [Validators.required, Validators.pattern(/^(https?:\/\/)[^\s]+$/i)]],
-    isPremium: [false]
+    categoryIds: [[] as number[]],
+    isPremium: [false],
+    file: [null, Validators.required] // bound via onFileSelected
   });
 
   uploading = false;
 
   ngOnInit(): void {
-    this.categoryService.getAll().subscribe({
-      next: (cats) => (this.allCategories = cats),
-      error: () => alert('Erreur lors du chargement des catégories')
-    });
+  // Charger les catégories
+  this.rcService.list().subscribe({
+    next: (cats) => {
+      this.allCategories = (cats || []).map(c => ({
+        ...c,
+        name: this.shared.fixEncoding(c.name),
+        description: c.description ? this.shared.fixEncoding(c.description) : undefined
+      }));
+    },
+    error: () => alert('Erreur lors du chargement des catégories')
+  });
+
+  // Mode édition
+  const data = history.state;
+  if (data && data.updateMode && data.document) {
+    this.updateMode = true;
+    this.docIdToEdit = data.document.id;
+    this.rowVersion = data.document.rowVersion;
+
+    this.populateForm(data.document);
+  }
+}
+populateForm(doc: any): void {
+  this.documentForm.patchValue({
+    title: doc.title,
+    description: doc.description,
+    categoryIds: doc.categoryIds ?? [],
+    isPremium: doc.isPremium ?? false
+  });
+
+  // En édition, le fichier n’est pas obligatoire (tu gardes l’existant si non remplacé)
+  this.documentForm.get('file')?.clearValidators();
+  this.documentForm.get('file')?.updateValueAndValidity();
+}
+
+
+  onFileSelected(evt: Event): void {
+    const input = evt.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.documentForm.patchValue({ file });
+    this.documentForm.get('file')?.markAsTouched();
   }
 
   onSubmit(): void {
-    if (this.documentForm.invalid) return;
+  if (this.documentForm.invalid || this.uploading) return;
 
-    const values = this.documentForm.value;
-    const formData = new FormData();
+  const v = this.documentForm.value;
 
-    formData.append('title', values.title);
-    formData.append('description', values.description || '');
-    formData.append('isPremium', values.isPremium.toString());
+  // build payload
+  const payload: DocumentCreateRequest = {
+    title: (v.title || '').trim(),
+    description: v.description || undefined,
+    isPremium: !!v.isPremium,
+    categoryIds: (v.categoryIds as number[]) ?? [],
+    file: v.file // File (required in create)
+  };
 
-    // ASP.NET Core liera bien une List<string> avec des clés répétées "categories"
-    if (values.categories?.length) {
-      values.categories.forEach((cat: string, i: number) => {
-        formData.append('categories', cat); // ou `categories[${i}]` si tu préfères indexer
-      });
+  this.uploading = true;
+
+  if (this.updateMode && this.docIdToEdit) {
+    // --- UPDATE ---
+    const req: DocumentUpdateRequest = {
+      id: this.docIdToEdit,
+      title: payload.title,
+      description: payload.description,
+      isPremium: payload.isPremium,
+      categoryIds: payload.categoryIds,
+      newFile: v.file ?? undefined, // only if admin selected a new one
+      // rowVersion: this.rowVersion, // add if your API requires it
+    };
+
+    this.documentService.updateDocument(req).subscribe({
+      next: () => { this.uploading = false; this.router.navigateByUrl('/admin/documents'); },
+      error: () => { this.uploading = false; alert("Erreur lors de la mise à jour du document"); }
+    });
+
+  } else {
+    // --- CREATE ---
+    if (!payload.file) {
+      this.uploading = false;
+      this.documentForm.get('file')?.markAsTouched();
+      return;
     }
 
-    // 🔑 BACK attend FileUrl
-    formData.append('fileUrl', values.url);
-
-    this.uploading = true;
-    this.documentService.addDocument(formData).subscribe({
-      next: () => {
-        this.uploading = false;
-        this.router.navigateByUrl('/documents');
-      },
-      error: () => {
-        this.uploading = false;
-        alert("Erreur lors de l'envoi du document");
-      }
+    this.documentService.addDocument(payload).subscribe({
+      next: () => { this.uploading = false; this.router.navigateByUrl('/admin/documents'); },
+      error: () => { this.uploading = false; alert("Erreur lors de l'envoi du document"); }
     });
   }
+}
+
+
 }

@@ -1,85 +1,140 @@
-<div class="document-library container py-4">
-  <h2 class="text-center mb-4">📚 Bibliothèque de Documents</h2>
-  <button *ngIf="auth.isAdmin" class="btn-create" (click)="createDocument()">
-  ➕ Nouveau document
-</button>
+<div class="doclib-wrapper container py-4">
+  <!-- Header -->
+  <div class="doclib-header d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-1 text-black">📚 Bibliothèque</h2>
+      <div class="text-muted small">
+        <span class="me-3">Total : {{ documents?.length || 0 }}</span>
+        <span class="me-3">Filtrés : {{ filteredDocuments?.length || 0 }}</span>
+        <span *ngIf="selectedCategory">Catégorie : <strong>{{ selectedCategory }}</strong></span>
+      </div>
+    </div>
 
+    <div class="doclib-actions d-flex gap-2 mt-3 mt-md-0">
+      <button *ngIf="auth.isAdmin" class="btn btn-create" (click)="createDocument()">
+        ➕ Nouveau document
+      </button>
 
-  <div class="search-bar mb-4 d-flex justify-content-center">
-    <input class="form-control w-50" type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un guide, un modèle, un sujet..." />
+      <div class="doclib-search input-group">
+        <span class="input-group-text border-0 bg-transparent pe-0">🔎</span>
+        <input
+          class="form-control border-0"
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="filterDocuments()"
+          placeholder="Rechercher un guide, un modèle, un sujet…"
+        />
+      </div>
+    </div>
   </div>
 
-  <div class="row">
-   <!-- Catégories dynamiques -->
-<div class="col-md-3 mb-3">
-  <div class="categories card p-3">
-    <strong>Catégories</strong>
-    <ul class="list-unstyled mt-2">
-      <li
-        [class.text-primary]="selectedCategory === ''"
-        style="cursor:pointer"
-        (click)="onCategorySelected('')"
-      >
-        Toutes
-      </li>
-      <li
-        *ngFor="let category of categories"
-        [class.text-primary]="selectedCategory === category.name"
-        style="cursor:pointer"
-        (click)="onCategorySelected(category.name)"
-      >
-        {{ category.name }}
-      </li>
-    </ul>
-  </div>
-</div>
-
-
-    <div class="col-md-9">
-      <div class="row">
-        <div *ngFor="let doc of documents" class="col-md-4 mb-4">
-          <div class="document-card card h-100">
-            <div class="card-body">
-              <div class="file-type" [ngClass]="docExtensionClass(doc.fileUrl)">
-                {{ getFileExtension(doc.fileUrl) }}
-              </div>
-              <div *ngIf="doc.isPremium" class="badge premium-badge">Premium</div>
-              <h5 class="card-title">{{ doc.title }}</h5>
-              <p class="card-text">{{ doc.description }}</p>
-            </div>
-            <div class="card-footer text-center">
-  <!-- ✅ Premium -->
-  <button
-    *ngIf="doc.isPremium && !(auth.userSubscription?.isActive)"
-    class="btn btn-danger w-100"
-    disabled
-  >
-    Abonnez-vous pour accéder
-  </button>
-
-  <!-- ✅ Libre -->
-  <button
-  *ngIf="!doc.isPremium || auth.userSubscription?.isActive"
-  class="btn btn-primary w-100"
-  (click)="viewDocument(doc.id)"
->
-  📖 Lire
-</button>
-
-</div>
-
-          </div>
+  <!-- Barre de filtres -->
+  <div class="filterbar card border-0 shadow-sm p-3 mb-4">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-8">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="fw-bold me-2 text-label">Catégories :</div>
+          <button type="button" class="chip" [class.active]="selectedCategory === ''" (click)="onCategorySelected('')">Toutes</button>
+          <button
+            *ngFor="let categoryName of categories"
+            type="button"
+            class="chip"
+            [class.active]="selectedCategory === categoryName"
+            (click)="onCategorySelected(categoryName)"
+          >
+            {{ categoryName }}
+          </button>
         </div>
       </div>
 
-      <nav class="d-flex justify-content-center mt-3">
-        <ul class="pagination">
-          <li class="page-item"><a class="page-link" href="#">« Précédent</a></li>
-          <li class="page-item active"><a class="page-link" href="#">1</a></li>
-          <li class="page-item"><a class="page-link" href="#">2</a></li>
-          <li class="page-item"><a class="page-link" href="#">Suivant »</a></li>
-        </ul>
-      </nav>
+      <div class="col-12 col-lg-4">
+  <div class="display-options d-flex justify-content-lg-end align-items-center gap-2">
+    <div class="fw-bold me-2 text-label">Affichage :</div>
+    <button type="button" class="pill" (click)="sortBy='recent'; filterDocuments()" [class.active]="sortBy==='recent'">⏰ Plus récents</button>
+    <button type="button" class="pill" (click)="sortBy='title'; filterDocuments()" [class.active]="sortBy==='title'">🔤 Titre A-Z</button>
+    <button type="button" class="pill" (click)="sortBy='type'; filterDocuments()" [class.active]="sortBy==='type'">🗂️ Type</button>
+  </div>
+</div>
+
     </div>
   </div>
+
+  <!-- Empty -->
+  <div *ngIf="(filteredDocuments?.length || 0) === 0" class="empty card border-0 shadow-sm p-5 text-center">
+    <div class="emoji">🗂️</div>
+    <h5 class="mb-2">Aucun document trouvé</h5>
+    <p class="text-muted mb-4">Essaie d’élargir la recherche ou de changer de catégorie.</p>
+    <button class="btn btn-outline-primary" (click)="resetFilters()">Réinitialiser</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="doc-grid mb-4" *ngIf="filteredDocuments?.length">
+    <article *ngFor="let doc of pagedDocuments" class="doc-card card border-0 shadow-sm h-100">
+      <!-- Badge extension -->
+      <div class="doc-type-badge" [ngClass]="docExtensionClass(doc.fileUrl)">
+        {{ (getFileExtension(doc.fileUrl) || 'FILE') | uppercase }}
+      </div>
+
+      <!-- Ruban premium -->
+      <div class="ribbon" *ngIf="doc.isPremium"><span>Premium</span></div>
+
+      <!-- Panneau d’aperçu (placeholder visuel) -->
+      <div class="doc-thumb" aria-hidden="true"></div>
+
+      <!-- Corps -->
+      <div class="card-body">
+        <h5 class="card-title text-truncate" [title]="doc.title">{{ doc.title }}</h5>
+        <p class="card-text two-lines" [title]="doc.description">{{ doc.description }}</p>
+
+        <!-- Ligne détails: EXT · date -->
+        <div class="details">
+          <span>{{ (getFileExtension(doc.fileUrl) || '').toUpperCase() }}</span>
+          <span *ngIf="doc.updatedAt || doc.createdAt">{{ (doc.updatedAt || doc.createdAt) | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <!-- Tags (catégories) -->
+        <div class="tags" *ngIf="doc.categories?.length">
+          <span class="tag" *ngFor="let c of doc.categories">{{ c }}</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="card-footer bg-transparent border-0 pt-0 d-flex gap-2">
+        <!-- Verrou si premium sans abonnement -->
+        <button
+          *ngIf="doc.isPremium && !(auth.userSubscription?.isActive)"
+          class="btn btn-locked w-100"
+          disabled
+          title="Abonnez-vous pour accéder"
+        >
+          🔒 Abonnement requis
+        </button>
+
+        <!-- Sinon Lire + Télécharger -->
+        <ng-container *ngIf="!doc.isPremium || auth.userSubscription?.isActive">
+          <button class="btn btn-read flex-fill" (click)="viewDocument(doc.id)">📖 Lire</button>
+          <a class="btn btn-outline flex-fill" *ngIf="doc.fileUrl" [href]="doc.fileUrl" download>Télécharger</a>
+        </ng-container>
+      </div>
+    </article>
+  </div>
+
+  <!-- Pagination -->
+  <nav
+    class="d-flex justify-content-center mt-auto pb-2"
+    aria-label="Pagination documents"
+    *ngIf="filteredDocuments.length > paginationThreshold && totalPages > 1"
+  >
+    <ul class="pagination pagination-sm">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" href (click)="goToPage(currentPage - 1); $event.preventDefault()">«</a>
+      </li>
+      <li class="page-item" *ngFor="let p of pages" [class.active]="p === currentPage">
+        <a class="page-link" href (click)="goToPage(p); $event.preventDefault()">{{ p }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" href (click)="goToPage(currentPage + 1); $event.preventDefault()">»</a>
+      </li>
+    </ul>
+  </nav>
 </div>

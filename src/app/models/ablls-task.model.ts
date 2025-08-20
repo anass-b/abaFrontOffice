@@ -40,3 +40,11 @@ export interface AbllsTask {
   updatedAt?: string;
   rowVersion?: number;
 }
+export interface AbllsTaskEnriched extends AbllsTask {
+  __domainName?: string;
+  __categoryName?: string;
+  __nCode?: string;
+  __nTitle?: string;
+  __nDom?: string;
+  __nCat?: string;
+}

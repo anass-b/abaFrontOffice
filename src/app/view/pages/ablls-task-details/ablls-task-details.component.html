@@ -55,6 +55,16 @@
       Votre navigateur ne supporte pas la lecture de la vidéo.
     </video>
   </div>
+  <!-- Bouton Baselines -->
+<div class="mt-3" *ngIf="baselines.length > 0">
+  <a
+    class="btn btn-outline-success"
+    [routerLink]="['/baseline/task', task?.id]"
+  >
+    📚 Voir les contenus de ligne de base
+  </a>
+</div>
+
 
 </div>
 

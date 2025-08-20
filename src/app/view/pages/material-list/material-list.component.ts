@@ -37,7 +37,7 @@ export class MaterialListComponent implements OnInit {
     );
   }
   onAdd(): void {
-    this.router.navigate(['/material/new']);
+    this.router.navigate(['/admin/material/new']);
   }
 
   onEdit(id: number): void {

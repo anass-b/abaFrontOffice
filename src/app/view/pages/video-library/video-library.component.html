@@ -1,114 +1,144 @@
-<div class="video-library container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="m-0">📽️ Bibliothèque de Vidéos de Formation</h2>
-    <a *ngIf="auth.isAdmin" class="btn btn-success" [routerLink]="['/videos/new']">
-  ➕ Ajouter une vidéo
-</a>
-
-  </div>
-
-  <div class="search-bar mb-4 d-flex justify-content-center">
-    <input
-      class="form-control w-50"
-      type="text"
-      [(ngModel)]="searchTerm"
-      placeholder="Rechercher une vidéo, un sujet, un mot-clé..." />
-  </div>
-
-  <div class="row">
-    <div class="col-md-3 mb-3">
-      <div class="categories card p-3">
-        <strong>Catégories</strong>
-        <ul class="list-unstyled mt-2">
-          <li (click)="selectCategory('')" [class.active]="selectedCategory === ''">Toutes les catégories</li>
-          <li *ngFor="let cat of categories" (click)="selectCategory(cat)" [class.active]="selectedCategory === cat">
-            {{ cat }}
-          </li>
-        </ul>
+<div class="video-lib container py-4">
+  <!-- Header (Kenane-style: title + meta inline) -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <h2 class="m-0 text-black">📚 Bibliothèque de Vidéos</h2>
+      <div class="text-muted small">
+        Total : <strong>{{ videos?.length || 0 }}</strong>
+        — Filtrées : <strong>{{ filtered?.length || 0 }}</strong>
+        <span *ngIf="selectedCategory"> — Catégorie : <strong>{{ selectedCategory }}</strong></span>
       </div>
     </div>
 
-    <div class="col-md-9">
-      <div *ngIf="loading">Chargement...</div>
+    <div class="d-flex gap-2 align-items-center" style="min-width: 420px; max-width: 520px; width: 100%;">
+      <div class="search input-group w-100">
+        <span class="input-group-text border-0 bg-transparent pe-0">🔍</span>
+        <input
+          class="form-control border-0"
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="filterVideos()"
+          placeholder="Rechercher une vidéo, un sujet, un mot-clé…"
+        />
+      </div>
+      <a *ngIf="auth.isAdmin" class="btn btn-create" [routerLink]="['/admin/videos/new']">＋ Ajouter Un Video</a>
+    </div>
+  </div>
 
-      <div class="row" *ngIf="!loading && filteredVideos().length > 0">
-        <div class="col-md-4 mb-4" *ngFor="let video of filteredVideos()">
-          <div class="video-card card h-100 d-flex flex-column">
-            <div class="video-thumbnail" [style.backgroundImage]="'url(' + video.thumbnailUrl + ')'">
-              <div *ngIf="video.isPremium" class="badge premium-badge">Premium</div>
-            </div>
+  <!-- Filter panel (Kenane-style panel → chips left, sort right) -->
+  <div class="filterbar card border-0 shadow-sm p-3 mb-4">
+    <div class="filters d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <!-- Chips -->
+      <div class="chips d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="chip" [class.active]="selectedCategory === ''" (click)="selectCategory('')">
+          Toutes
+        </button>
+        <button
+          *ngFor="let cat of categories"
+          type="button"
+          class="chip"
+          [class.active]="selectedCategory === cat"
+          (click)="selectCategory(cat)"
+        >
+          {{ cat }}
+        </button>
+      </div>
 
-            <div class="card-body flex-grow-1">
-              <h5 class="card-title">{{ video.title }}</h5>
-              <p class="text-muted small">
-                {{ video.categories?.join(', ') }} · {{ formatDuration(video.duration) }}
-              </p>
+      <!-- Sort pills -->
+      <div class="sort d-flex flex-wrap gap-2">
+        <button type="button" class="pill" (click)="sortBy='recent';  filterVideos()" [class.active]="sortBy==='recent'">⏰ Plus récents</button>
+        <button type="button" class="pill" (click)="sortBy='title';   filterVideos()" [class.active]="sortBy==='title'">🔤 Titre A-Z</button>
+        <button type="button" class="pill" (click)="sortBy='duration';filterVideos()" [class.active]="sortBy==='duration'">⏱️ Durée</button>
+      </div>
+    </div>
+  </div>
 
-            </div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-muted">Chargement…</div>
 
-            <!-- 👇 Zone des actions -->
-            <div class="card-footer bg-light border-top d-flex justify-content-between px-3">
-              <!-- ▶️ Lire -->
-                     <!-- ▶️ Lire : accessible uniquement si abonné ou pas premium -->
-<!-- ▶️ Lire : seulement si l'utilisateur y a accès -->
-<button
-  class="btn btn-sm btn-outline-primary"
-  (click)="viewVideo(video.id)"
-  [disabled]="!canAccess(video)"
-  title="Lire la vidéo"
->
-  ▶️ Lire
-</button>
+  <!-- Empty -->
+  <div *ngIf="!loading && (filtered?.length || 0) === 0" class="empty card border-0 shadow-sm p-5 text-center">
+    <div class="emoji">🎬</div>
+    <h5 class="mb-2">Aucune vidéo trouvée</h5>
+    <p class="text-muted mb-4">Essaie d’élargir la recherche ou de changer de catégorie.</p>
+    <button class="btn btn-outline-primary" (click)="resetFilters()">Réinitialiser</button>
+  </div>
 
+  <!-- Grid (12-col like template) -->
+  <div class="video-grid mb-4" *ngIf="!loading && filtered?.length">
+    <article
+      *ngFor="let video of pagedVideos"
+      class="vcard card border-0 shadow-sm h-100 d-flex flex-column"
+    >
+      <!-- Thumb -->
+      <div class="thumb">
+        <img [src]="video.thumbnailUrl" [alt]="video.title || 'thumbnail'" />
+        <button
+          class="play"
+          (click)="viewVideo(video.id)"
+          [disabled]="!canAccess(video)"
+          [title]="canAccess(video) ? 'Lire' : 'Abonnement requis'"
+        >
+          ▶
+        </button>
+        <div class="duration" *ngIf="video.duration">{{ formatDuration(video.duration) }}</div>
+        <div class="ribbon" *ngIf="video.isPremium"><span>Premium</span></div>
+      </div>
 
-
-
-              
-              
-
-             <!-- ✏️ Modifier : Admin OU propriétaire -->
-<button
-  *ngIf="auth.isAdmin || auth.isOwner({ createdBy: video.createdBy! })"
-  class="btn btn-sm btn-outline-warning"
-  (click)="editVideo(video)"
-  title="Modifier"
->
-  ✏️
-</button>
-
-<!-- 🗑️ Supprimer : Admin OU propriétaire -->
-<button
-  *ngIf="auth.isAdmin || auth.isOwner({ createdBy: video.createdBy! })"
-  class="btn btn-sm btn-outline-danger"
-  (click)="deleteVideo(video)"
-  title="Supprimer"
->
-  🗑️
-</button>
-
-            </div>
-          </div>
+      <!-- Body -->
+      <div class="card-body flex-grow-1">
+        <h5 class="title text-truncate" [title]="video.title">{{ video.title }}</h5>
+        <p class="desc two-lines text-muted" [title]="video.description">{{ video.description }}</p>
+        <div class="meta mt-2">
+          <span class="chip-mini" *ngFor="let c of (video.categories || [])">{{ c }}</span>
         </div>
       </div>
 
-      <!-- ✅ Zone de lecture -->
-      <div *ngIf="videoUrl" class="video-player mt-4 text-center">
-          <h4>Lecture de la Vidéo</h4>
-          <video
-            width="640"
-            controls
-            autoplay
-            [src]="videoUrl"
-            (contextmenu)="$event.preventDefault()"
-          ></video>
-          <div class="mt-2">
-            <button class="btn btn-outline-secondary" (click)="videoUrl = null">❌ Fermer</button>
-          </div>
-        </div>
+      <!-- Footer actions (Kenane: primary left, secondary group right) -->
+      <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center gap-2">
+        <button
+          class="btn btn-read flex-grow-1"
+          (click)="viewVideo(video.id)"
+          [disabled]="!canAccess(video)"
+        >
+          ▶️ Lire
+        </button>
 
-      <div *ngIf="!loading && filteredVideos().length === 0" class="text-center text-muted">
-        Aucune vidéo trouvée.
+        <div class="d-flex gap-2" *ngIf="auth.isAdmin || auth.isOwner({ createdBy: video.createdBy! })">
+          <button class="btn btn-edit" (click)="editVideo(video)" title="Modifier">✏️</button>
+          <button class="btn btn-del"  (click)="deleteVideo(video)" title="Supprimer">🗑️</button>
+        </div>
       </div>
+    </article>
+  </div>
+
+  <!-- Pagination -->
+  <nav
+    class="d-flex justify-content-center mt-auto pb-2"
+    aria-label="Pagination vidéos"
+    *ngIf="filtered.length > paginationThreshold && totalPages > 1"
+  >
+    <ul class="pagination pagination-sm">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" href (click)="goToPage(currentPage - 1); $event.preventDefault()">«</a>
+      </li>
+
+      <li class="page-item" *ngFor="let p of pages" [class.active]="p === currentPage">
+        <a class="page-link" href (click)="goToPage(p); $event.preventDefault()">{{ p }}</a>
+      </li>
+
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" href (click)="goToPage(currentPage + 1); $event.preventDefault()">»</a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Player (optionnel) -->
+  <div *ngIf="videoUrl" class="video-player mt-4 text-center">
+    <h4>Lecture de la Vidéo</h4>
+    <video width="640" controls autoplay [src]="videoUrl" (contextmenu)="$event.preventDefault()"></video>
+    <div class="mt-2">
+      <button class="btn btn-outline-secondary" (click)="videoUrl = null">❌ Fermer</button>
     </div>
   </div>
 </div>

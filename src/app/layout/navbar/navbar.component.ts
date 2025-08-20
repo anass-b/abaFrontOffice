@@ -1,24 +1,35 @@
-import { Component , Output,EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Router, RouterLink , RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
-import { Router } from '@angular/router';
-import { inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink , RouterLinkActive],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  authService = inject(AuthService);
-  router = inject(Router);
-   @Output() toggle = new EventEmitter<void>();
+  /** Affiche le bouton hamburger (admin, mobile/tablette) */
+  @Input() showToggle = false;
 
-  logout(): void {
-    this.authService.logOut();
-    this.router.navigate(['/login']);
+  /** Affiche le menu profil admin (Profil / Déconnexion) */
+  @Input() showAdminProfileMenu = false;
+
+  /** Événement pour ouvrir/fermer la sidebar */
+  @Output() toggle = new EventEmitter<void>();
+
+  // ⚠ public pour usage dans le template
+  public auth = inject(AuthService);
+  private router = inject(Router);
+
+  onToggle(): void {
+    this.toggle.emit();
   }
 
+  logout(): void {
+    this.auth.logOut();
+    this.router.navigate(['/login']);
+  }
 }

@@ -23,6 +23,15 @@ export class BaselineContentService extends SharedService {
       catchError(() => of([]))
     );
   }
+  fetchById(id: number) {
+  return this.auth.checkAuthentication().pipe(
+    switchMap(auth => auth
+      ? this.http.get<BaselineContent>(`${this.apiUrl}/${id}`)
+      : of(null)
+    ),
+    catchError(() => of(null))
+  );
+}
 
   // 📄 Récupérer les contenus de ligne de base pour une tâche
   fetchByTaskId(taskId: number): Observable<BaselineContent[]> {
@@ -31,6 +40,15 @@ export class BaselineContentService extends SharedService {
       catchError(() => of([]))
     );
   }
+  streamById(id: number) {
+  return this.auth.checkAuthentication().pipe(
+    switchMap(auth => auth
+      ? this.http.get(`${this.apiUrl}/stream/${id}`, { responseType: 'blob' })
+      : of(null as any)
+    ),
+    catchError(() => of(null as any))
+  );
+}
 
   // ➕ Créer un contenu de ligne de base avec FormData
   create(formData: FormData): Observable<BaselineContent | null> {
